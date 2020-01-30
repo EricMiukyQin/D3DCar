@@ -15,6 +15,7 @@ App::App(HINSTANCE hInstance)
 {
 	m_pCar = std::make_unique<CarModel>();
 	m_pRefObj = std::make_unique<D3DObject>();
+	m_pGrass = std::make_unique<D3DObject>();
 }
 
 App::~App()
@@ -63,7 +64,7 @@ void App::UpdateScene(float dt)
 	Keyboard::State keyState = m_pKeyboard->GetState();
 	m_KeyboardTracker.Update(keyState);
 
-	// Car move and turn
+	 //Car move and turn
 	if (keyState.IsKeyDown(Keyboard::W))
 	{
 		m_pCar->Move(dt);
@@ -91,7 +92,7 @@ void App::UpdateScene(float dt)
 	if (m_CameraMode == CameraMode::FirstPerson) {
 		// Set camera position
 		XMFLOAT3 cameraPos = m_pCar->GetPosition();
-		cameraPos.y += 1.2f;
+		cameraPos.y += 2.0f;
 		cam1st->SetPosition(cameraPos);
 
 		// Field of view rotation to prevent sudden rotation caused by too large difference
@@ -115,7 +116,7 @@ void App::UpdateScene(float dt)
 	// Reset scroll wheel value
 	m_pMouse->ResetScrollWheelValue();
 
-	// Switch camera mode
+	 //Switch camera mode
 	if (m_KeyboardTracker.IsKeyPressed(Keyboard::Tab)) {
 		if (m_CameraMode == CameraMode::ThirdPerson) {
 			// Switch to FirstPerson mode
@@ -125,7 +126,7 @@ void App::UpdateScene(float dt)
 					cam1st->SetFrustum(XM_PI / 3, AspectRatio(), 0.5f, 1000.0f);
 					m_pCamera = cam1st;
 			}
-			cam1st->LookTo(XMFLOAT3(m_pCar->GetPosition().x, 1.5f, m_pCar->GetPosition().z), m_pCar->GetDirection(), XMFLOAT3(0.0f, 1.0f, 0.0f));
+			cam1st->LookTo(XMFLOAT3(m_pCar->GetPosition().x, 2.0f, m_pCar->GetPosition().z), m_pCar->GetDirection(), XMFLOAT3(0.0f, 1.0f, 0.0f));
 
 			m_CameraMode = CameraMode::FirstPerson;
 		}
@@ -167,6 +168,7 @@ void App::DrawScene()
 
 	m_pCar->Draw(m_pd3dImmediateContext.Get());
 	m_pRefObj->Draw(m_pd3dImmediateContext.Get());
+	m_pGrass->Draw(m_pd3dImmediateContext.Get());
 
 	m_pSwapChain->Present(0, 0);
 }
@@ -177,15 +179,15 @@ bool App::InitEffect()
 	ComPtr<ID3DBlob> blob;
 
 	// Create Vertex Shader
-	HR(CreateShaderFromFile(L"..\\Debug\\Basic_VS_3D.cso", L"Basic_VS_3D.hlsl", "VS", "vs_5_0", blob.ReleaseAndGetAddressOf()));
+	HR(CreateShaderFromFile(L"..\\x64\\Debug\\Basic_VS_3D.cso", L"Basic_VS_3D.hlsl", "VS_3D", "vs_5_0", blob.ReleaseAndGetAddressOf()));
 	HR(m_pd3dDevice->CreateVertexShader(blob->GetBufferPointer(), blob->GetBufferSize(), nullptr, m_pVertexShader.GetAddressOf()));
 
-	// Create Input Layout
-	HR(m_pd3dDevice->CreateInputLayout(VertexPosNormalColor::inputLayout, ARRAYSIZE(VertexPosNormalColor::inputLayout),
+	// Create Input Layout 
+	HR(m_pd3dDevice->CreateInputLayout(VertexPosNormalTex::inputLayout, ARRAYSIZE(VertexPosNormalTex::inputLayout),
 		blob->GetBufferPointer(), blob->GetBufferSize(), m_pVertexLayout.GetAddressOf()));
 
 	// Create Pixel Shader
-	HR(CreateShaderFromFile(L"..\\Debug\\Basic_PS_3D.cso", L"Basic_PS_3D.hlsl", "PS", "ps_5_0", blob.ReleaseAndGetAddressOf()));
+	HR(CreateShaderFromFile(L"..\\x64\\Debug\\Basic_PS_3D.cso", L"Basic_PS_3D.hlsl", "PS_3D", "ps_5_0", blob.ReleaseAndGetAddressOf()));
 	HR(m_pd3dDevice->CreatePixelShader(blob->GetBufferPointer(), blob->GetBufferSize(), nullptr, m_pPixelShader.GetAddressOf()));
 
 	return true;
@@ -194,11 +196,6 @@ bool App::InitEffect()
 
 bool App::InitResource()
 {
-	// Create objects in game world
-	m_pCar->CreateCar(m_pd3dDevice.Get());
-	m_pRefObj->SetBuffer<VertexPosNormalColor>(m_pd3dDevice.Get(), Geometry::CreateBox<VertexPosNormalColor>());
-	m_pRefObj->SetWorldMatrix(XMMatrixTranslation(-30.0f, 0.0f, 0.0f));
-
 	// Constant buffer description
 	D3D11_BUFFER_DESC cbd;
 	ZeroMemory(&cbd, sizeof(cbd));
@@ -216,12 +213,46 @@ bool App::InitResource()
 	cbd.ByteWidth = sizeof(CBChangesRarely);
 	m_pd3dDevice->CreateBuffer(&cbd, nullptr, m_pConstantBuffers[3].GetAddressOf());
 
+
+	// Create objects in game world
+	m_pCar->CreateCar(m_pd3dDevice.Get());
+
+	// RefObj
+	ComPtr<ID3D11ShaderResourceView> texture;
+	HR(CreateDDSTextureFromFile(m_pd3dDevice.Get(), L"Texture\\WoodCrate.dds", nullptr, texture.GetAddressOf()));
+	m_pRefObj->SetBuffer(m_pd3dDevice.Get(), Geometry::CreateBox());
+	m_pRefObj->SetWorldMatrix(XMMatrixTranslation(-30.0f, 0.0f, 0.0f));
+	m_pRefObj->SetTexture(texture.Get());
+
+	// Grass
+	HR(CreateDDSTextureFromFile(m_pd3dDevice.Get(), L"Texture\\Grass.dds", nullptr, texture.ReleaseAndGetAddressOf()));
+	m_pGrass->SetBuffer(m_pd3dDevice.Get(),
+		Geometry::CreatePlane(XMFLOAT2(1000.0f, 1000.0f), XMFLOAT2(100.0f, 100.0f)));
+	m_pGrass->SetTexture(texture.Get());
+	m_pGrass->SetWorldMatrix(XMMatrixTranslation(0.0f, -2.0f, 0.0f));
+
+	// ******************
+	// Initialize the sampler state
+	D3D11_SAMPLER_DESC sampDesc;
+	ZeroMemory(&sampDesc, sizeof(sampDesc));
+	sampDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+	sampDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+	sampDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+	sampDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+	sampDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
+	sampDesc.MinLOD = 0;
+	sampDesc.MaxLOD = D3D11_FLOAT32_MAX;
+	HR(m_pd3dDevice->CreateSamplerState(&sampDesc, m_pSamplerState.GetAddressOf()));
+
+
+
+
 	// Initialize camera
 	m_CameraMode = CameraMode::FirstPerson;
 	auto camera = std::shared_ptr<FirstPersonCamera>(new FirstPersonCamera);
 	m_pCamera = camera;
 	camera->SetViewPort(0.0f, 0.0f, (float)m_ClientWidth, (float)m_ClientHeight);
-	camera->LookTo(XMFLOAT3(m_pCar->GetPosition().x, 1.5f, m_pCar->GetPosition().z), m_pCar->GetDirection(), XMFLOAT3(0.0f, 1.0f, 0.0f));
+	camera->LookTo(XMFLOAT3(m_pCar->GetPosition().x, 2.0f, m_pCar->GetPosition().z), m_pCar->GetDirection(), XMFLOAT3(0.0f, 1.0f, 0.0f));
 
 	///////// Initialize value in constant buffer
 
@@ -275,7 +306,7 @@ bool App::InitResource()
 	m_pd3dImmediateContext->PSSetConstantBuffers(1, 1, m_pConstantBuffers[1].GetAddressOf());
 	m_pd3dImmediateContext->PSSetConstantBuffers(3, 1, m_pConstantBuffers[3].GetAddressOf());
 	m_pd3dImmediateContext->PSSetShader(m_pPixelShader.Get(), nullptr, 0);
-	//m_pd3dImmediateContext->PSSetSamplers(0, 1, m_pSamplerState.GetAddressOf());
+	m_pd3dImmediateContext->PSSetSamplers(0, 1, m_pSamplerState.GetAddressOf());
 
 	return true;
 }

@@ -1,4 +1,5 @@
 #include "CarModel.h"
+#include "DDSTextureLoader.h"
 
 using namespace DirectX;
 
@@ -94,6 +95,17 @@ void CarModel::Move(float dt)
 {
 	float distance = dt * moveSpeed;
 
+	static float angle = 0.0f;
+	angle += distance > 0 ? 0.02f : -0.02f;
+
+	// Calculate wheels' rotation
+	for (int i = 2; i < NUM_PARTS_CAR; ++i) {
+		XMStoreFloat4x4(
+			&m_car[i]->local_rot,
+			XMMatrixRotationX(XMConvertToRadians(90.0f)) * XMMatrixRotationZ(angle));
+		m_car[i]->UpdateLocalWorldMatrix();
+	}
+
 	// destination = distance * front + pos
 	XMVECTOR destination = XMVectorMultiplyAdd(
 		XMVectorReplicate(distance),
@@ -167,7 +179,7 @@ void CarModel::SetStop()
 void CarModel::CreateCarBase(ID3D11Device* device)
 {
 	// Set buffer
-	m_car[0]->SetBuffer<VertexPosNormalColor>(device, Geometry::CreateBox<VertexPosNormalColor>());
+	m_car[0]->SetBuffer(device, Geometry::CreateBox());
 
 	// Set local matrices
 	XMStoreFloat4x4(&m_car[0]->local_scale, XMMatrixScaling(4.0f, 0.5f, 2.0f));
@@ -179,12 +191,17 @@ void CarModel::CreateCarBase(ID3D11Device* device)
 	material.diffuse = XMFLOAT4(0.8f, 0.8f, 0.8f, 1.0f);
 	material.specular = XMFLOAT4(0.1f, 0.1f, 0.1f, 16.0f);
 	m_car[0]->SetMaterial(material);
+
+	// Set texture
+	ComPtr<ID3D11ShaderResourceView> texture;
+	HR(CreateDDSTextureFromFile(device, L"Texture\\car\\car_base.dds", nullptr, texture.GetAddressOf()));
+	m_car[0]->SetTexture(texture.Get());
 }
 
 void CarModel::CreateCarBody(ID3D11Device * device)
 {
 	// Set buffer
-	m_car[1]->SetBuffer<VertexPosNormalColor>(device, Geometry::CreateBox<VertexPosNormalColor>());
+	m_car[1]->SetBuffer(device, Geometry::CreateBox());
 
 	// Set local matrices
 	XMStoreFloat4x4(&m_car[1]->local_scale, XMMatrixScaling(3.0f, 0.5f, 2.0f));
@@ -197,12 +214,17 @@ void CarModel::CreateCarBody(ID3D11Device * device)
 	material.diffuse = XMFLOAT4(0.8f, 0.8f, 0.8f, 1.0f);
 	material.specular = XMFLOAT4(0.1f, 0.1f, 0.1f, 16.0f);
 	m_car[1]->SetMaterial(material);
+
+	// Set texture
+	ComPtr<ID3D11ShaderResourceView> texture;
+	HR(CreateDDSTextureFromFile(device, L"Texture\\car\\car_body.dds", nullptr, texture.GetAddressOf()));
+	m_car[1]->SetTexture(texture.Get());
 }
 
 void CarModel::CreateFrontLeftWheel(ID3D11Device * device)
 {
 	// Set buffer
-	m_car[2]->SetBuffer<VertexPosNormalColor>(device, Geometry::CreateCylinder<VertexPosNormalColor>());
+	m_car[2]->SetBuffer(device, Geometry::CreateCylinder());
 
 	// Set local matrices
 	XMStoreFloat4x4(&m_car[2]->local_scale, XMMatrixScaling(0.8f, 0.25f, 0.8f));
@@ -216,12 +238,17 @@ void CarModel::CreateFrontLeftWheel(ID3D11Device * device)
 	material.diffuse = XMFLOAT4(0.8f, 0.8f, 0.8f, 1.0f);
 	material.specular = XMFLOAT4(0.1f, 0.1f, 0.1f, 16.0f);
 	m_car[2]->SetMaterial(material);
+
+	// Set texture
+	ComPtr<ID3D11ShaderResourceView> texture;
+	HR(CreateDDSTextureFromFile(device, L"Texture\\car\\car_wheel.dds", nullptr, texture.GetAddressOf()));
+	m_car[2]->SetTexture(texture.Get());
 }
 
 void CarModel::CreateFrontRightWheel(ID3D11Device * device)
 {
 	// Set buffer
-	m_car[3]->SetBuffer<VertexPosNormalColor>(device, Geometry::CreateCylinder<VertexPosNormalColor>());
+	m_car[3]->SetBuffer(device, Geometry::CreateCylinder());
 
 	// Set local matrices
 	XMStoreFloat4x4(&m_car[3]->local_scale, XMMatrixScaling(0.8f, 0.25f, 0.8f));
@@ -235,12 +262,17 @@ void CarModel::CreateFrontRightWheel(ID3D11Device * device)
 	material.diffuse = XMFLOAT4(0.8f, 0.8f, 0.8f, 1.0f);
 	material.specular = XMFLOAT4(0.1f, 0.1f, 0.1f, 16.0f);
 	m_car[3]->SetMaterial(material);
+
+	// Set texture
+	ComPtr<ID3D11ShaderResourceView> texture;
+	HR(CreateDDSTextureFromFile(device, L"Texture\\car\\car_wheel.dds", nullptr, texture.GetAddressOf()));
+	m_car[3]->SetTexture(texture.Get());
 }
 
 void CarModel::CreateBackLeftWheel(ID3D11Device * device)
 {
 	// Set buffer
-	m_car[4]->SetBuffer<VertexPosNormalColor>(device, Geometry::CreateCylinder<VertexPosNormalColor>());
+	m_car[4]->SetBuffer(device, Geometry::CreateCylinder());
 
 	// Set local matrices
 	XMStoreFloat4x4(&m_car[4]->local_scale, XMMatrixScaling(0.8f, 0.25f, 0.8f));
@@ -254,12 +286,17 @@ void CarModel::CreateBackLeftWheel(ID3D11Device * device)
 	material.diffuse = XMFLOAT4(0.8f, 0.8f, 0.8f, 1.0f);
 	material.specular = XMFLOAT4(0.1f, 0.1f, 0.1f, 16.0f);
 	m_car[4]->SetMaterial(material);
+
+	// Set texture
+	ComPtr<ID3D11ShaderResourceView> texture;
+	HR(CreateDDSTextureFromFile(device, L"Texture\\car\\car_wheel.dds", nullptr, texture.GetAddressOf()));
+	m_car[4]->SetTexture(texture.Get());
 }
 
 void CarModel::CreateBackRightWheel(ID3D11Device * device)
 {
 	// Set buffer
-	m_car[5]->SetBuffer<VertexPosNormalColor>(device, Geometry::CreateCylinder<VertexPosNormalColor>());
+	m_car[5]->SetBuffer(device, Geometry::CreateCylinder());
 
 	// Set local matrices
 	XMStoreFloat4x4(&m_car[5]->local_scale, XMMatrixScaling(0.8f, 0.25f, 0.8f));
@@ -273,4 +310,9 @@ void CarModel::CreateBackRightWheel(ID3D11Device * device)
 	material.diffuse = XMFLOAT4(0.8f, 0.8f, 0.8f, 1.0f);
 	material.specular = XMFLOAT4(0.1f, 0.1f, 0.1f, 16.0f);
 	m_car[5]->SetMaterial(material);
+
+	// Set texture
+	ComPtr<ID3D11ShaderResourceView> texture;
+	HR(CreateDDSTextureFromFile(device, L"Texture\\car\\car_wheel.dds", nullptr, texture.GetAddressOf()));
+	m_car[5]->SetTexture(texture.Get());
 }

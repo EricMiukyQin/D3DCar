@@ -2,6 +2,7 @@
 
 #include "d3dApp.h"
 #include "CarModel.h"
+#include "D3DObject.h"
 
 class Camera;
 
@@ -61,12 +62,15 @@ private:
 	ComPtr<ID3D11VertexShader> m_pVertexShader;	  // Vertex Shader
 	ComPtr<ID3D11PixelShader> m_pPixelShader;	  // Pixel Shader
 
+	ComPtr<ID3D11SamplerState> m_pSamplerState;	  // Sampler status
+
 	CBChangesEveryFrame m_CBFrame;				  // Constant buffer of stuff changes every frame
 	CBChangesOnResize m_CBOnResize;				  // Constant buffer of stuff changes on resize
 	CBChangesRarely m_CBRarely;					  // Constant buffer of stuff that rarely changed
 
 	std::unique_ptr<CarModel> m_pCar;             // Car model
 	std::unique_ptr<D3DObject> m_pRefObj;         // Refer object
+	std::unique_ptr<D3DObject> m_pGrass;          // Grass object
 
 	std::shared_ptr<Camera> m_pCamera;			  // Camera
 	CameraMode m_CameraMode;					  // Camera mode

@@ -48,6 +48,7 @@ public:
 	void SetWorldMatrix(const DirectX::XMFLOAT4X4& world);     // Set world matrix
 	void XM_CALLCONV SetWorldMatrix(DirectX::FXMMATRIX world); // Set world matrix
 	void SetMaterial(const Material& material);                // Set Material
+	void SetTexture(ID3D11ShaderResourceView* texture);        // Set Texture
 
 public:
 	template<class VertexType, class IndexType>
@@ -60,7 +61,8 @@ private:
 	DirectX::XMFLOAT4X4 m_world;			// World matrix
 	DirectX::XMFLOAT3 m_position;           // Position
 
-	Material m_material;                    // Material
+	Material m_material;                              // Material
+	ComPtr<ID3D11ShaderResourceView> m_pTexture;      // Texture
 
 	ComPtr<ID3D11Buffer> m_pVertexBuffer;   // Vertex Buffer
 	ComPtr<ID3D11Buffer> m_pIndexBuffer;	// Index Buffer

@@ -7,6 +7,9 @@
 class CarModel
 {
 protected:
+	template <class T>
+	using ComPtr = Microsoft::WRL::ComPtr<T>;
+
 	class Component : public D3DObject {
 	public:
 		Component();

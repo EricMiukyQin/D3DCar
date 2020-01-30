@@ -36,6 +36,11 @@ void D3DObject::SetMaterial(const Material & material)
 	m_material = material;
 }
 
+void D3DObject::SetTexture(ID3D11ShaderResourceView * texture)
+{
+	m_pTexture = texture;
+}
+
 void D3DObject::Draw(ID3D11DeviceContext* deviceContext)
 {
 	// Set Vertex buffer and Index buffer settings for input assembly stage
@@ -56,9 +61,12 @@ void D3DObject::Draw(ID3D11DeviceContext* deviceContext)
 
 	// Update the Constant buffer
 	D3D11_MAPPED_SUBRESOURCE mappedData;
-	deviceContext->Map(cBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedData);
+	HR(deviceContext->Map(cBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedData));
 	memcpy_s(mappedData.pData, sizeof(CBChangesEveryDrawing), &cbDrawing, sizeof(CBChangesEveryDrawing));
 	deviceContext->Unmap(cBuffer.Get(), 0);
+
+	// Set texture
+	deviceContext->PSSetShaderResources(0, 1, m_pTexture.GetAddressOf());
 
 	// Draw
 	deviceContext->DrawIndexed(m_IndexCount, 0, 0);
