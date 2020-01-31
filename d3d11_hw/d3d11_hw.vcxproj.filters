@@ -20,6 +20,9 @@
     <Filter Include="Camera">
       <UniqueIdentifier>{a93fbd63-3f4a-4d8c-93f0-05e07ca6f1eb}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Effects">
+      <UniqueIdentifier>{1bb7f01d-183c-43e4-8e79-9d2f94b5cdf0}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="D3DObject.cpp">
@@ -72,6 +75,9 @@
     </ClCompile>
     <ClCompile Include="RenderStates.cpp">
       <Filter>Framework</Filter>
+    </ClCompile>
+    <ClCompile Include="BasicEffect.cpp">
+      <Filter>Effects</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -129,21 +135,33 @@
     <ClInclude Include="RenderStates.h">
       <Filter>Framework</Filter>
     </ClInclude>
+    <ClInclude Include="EffectHelper.h">
+      <Filter>Effects</Filter>
+    </ClInclude>
+    <ClInclude Include="Effects.h">
+      <Filter>Effects</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="Basic_PS_3D.hlsl">
+    <None Include="HLSL\Basic.hlsli">
       <Filter>Shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="Basic_VS_3D.hlsl">
+    </None>
+    <None Include="HLSL\LightHelper.hlsli">
       <Filter>Shaders</Filter>
-    </FxCompile>
+    </None>
   </ItemGroup>
   <ItemGroup>
-    <None Include="LightHelper.hlsli">
+    <FxCompile Include="HLSL\Basic_PS_2D.hlsl">
       <Filter>Shaders</Filter>
-    </None>
-    <None Include="Basic.hlsli">
+    </FxCompile>
+    <FxCompile Include="HLSL\Basic_PS_3D.hlsl">
       <Filter>Shaders</Filter>
-    </None>
+    </FxCompile>
+    <FxCompile Include="HLSL\Basic_VS_2D.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="HLSL\Basic_VS_3D.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
   </ItemGroup>
 </Project>

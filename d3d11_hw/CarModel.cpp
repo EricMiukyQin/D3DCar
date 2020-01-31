@@ -154,10 +154,10 @@ void CarModel::Turn(float & worldDegree, float dt)
 	UpdateWorldMatrix();
 }
 
-void CarModel::Draw(ID3D11DeviceContext * deviceContext)
+void CarModel::Draw(ID3D11DeviceContext * deviceContext, BasicEffect& effect)
 {
 	for (int i = 0; i < NUM_PARTS_CAR; ++i) {
-		m_car[i]->Draw(deviceContext);
+		m_car[i]->Draw(deviceContext, effect);
 	}
 }
 

@@ -1,43 +1,14 @@
 #pragma once
 
-#include <d3d11_1.h>
-#include <wrl/client.h>
-#include <DirectXMath.h>
+#include "Effects.h"
 #include "DXTrace.h"
 #include "Geometry.h"
-#include "LightHelper.h"
 
 
-class D3DObject
-{
-protected:
+class D3DObject {
+public:
 	template <class T>
 	using ComPtr = Microsoft::WRL::ComPtr<T>;
-
-	struct CBChangesEveryDrawing {
-		DirectX::XMMATRIX world;
-		DirectX::XMMATRIX worldInvTranspose;
-		Material material;
-	};
-
-	struct CBChangesEveryFrame {
-		DirectX::XMMATRIX view;
-		DirectX::XMFLOAT4 eyePos;
-	};
-
-	struct CBChangesOnResize {
-		DirectX::XMMATRIX proj;
-	};
-
-	struct CBChangesRarely {
-		DirectionalLight dirLight[10];
-		PointLight pointLight[10];
-		SpotLight spotLight[10];
-		int numDirLight;
-		int numPointLight;
-		int numSpotLight;
-		int pad;
-	};
 
 public:
 	D3DObject();
@@ -54,21 +25,17 @@ public:
 	template<class VertexType, class IndexType>
 	void SetBuffer(ID3D11Device* device, const Geometry::MeshData<VertexType, IndexType>& meshData);
 
-	void Draw(ID3D11DeviceContext* deviceContext);
-
+	void Draw(ID3D11DeviceContext * deviceContext, BasicEffect& effect);
 
 private:
-	DirectX::XMFLOAT4X4 m_world;			// World matrix
-	DirectX::XMFLOAT3 m_position;           // Position
-
-	Material m_material;                              // Material
-	ComPtr<ID3D11ShaderResourceView> m_pTexture;      // Texture
-
-	ComPtr<ID3D11Buffer> m_pVertexBuffer;   // Vertex Buffer
-	ComPtr<ID3D11Buffer> m_pIndexBuffer;	// Index Buffer
-
-	UINT m_VertexStride;					// Index byte size
-	UINT m_IndexCount;						// Indexed array size of object
+	DirectX::XMFLOAT4X4 m_world;			       // World matrix
+	DirectX::XMFLOAT3 m_position;                  // Position
+	Material m_material;                           // Material
+	ComPtr<ID3D11ShaderResourceView> m_pTexture;   // Texture
+	ComPtr<ID3D11Buffer> m_pVertexBuffer;          // Vertex Buffer
+	ComPtr<ID3D11Buffer> m_pIndexBuffer;	       // Index Buffer
+	UINT m_VertexStride;					       // Index byte size
+	UINT m_IndexCount;						       // Indexed array size of object
 };
 
 template<class VertexType, class IndexType>
@@ -76,6 +43,9 @@ void D3DObject::SetBuffer(ID3D11Device* device, const Geometry::MeshData<VertexT
 	// Release old resource
 	m_pVertexBuffer.Reset();
 	m_pIndexBuffer.Reset();
+
+	// Check D3D device
+	if (device == nullptr) return;
 
 	// Vertex buffer description
 	m_VertexStride = sizeof(VertexType);
@@ -105,3 +75,4 @@ void D3DObject::SetBuffer(ID3D11Device* device, const Geometry::MeshData<VertexT
 	InitData.pSysMem = meshData.indexVec.data();
 	HR(device->CreateBuffer(&ibd, &InitData, m_pIndexBuffer.GetAddressOf()));
 }
+

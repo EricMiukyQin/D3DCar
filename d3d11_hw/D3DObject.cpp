@@ -41,32 +41,20 @@ void D3DObject::SetTexture(ID3D11ShaderResourceView * texture)
 	m_pTexture = texture;
 }
 
-void D3DObject::Draw(ID3D11DeviceContext* deviceContext)
+void D3DObject::Draw(ID3D11DeviceContext * deviceContext, BasicEffect& effect)
 {
-	// Set Vertex buffer and Index buffer settings for input assembly stage
-	UINT strides = m_VertexStride;  // Number of bytes crossed
-	UINT offsets = 0;               // Starting offset
+	// Set vertex buffer and index buffer
+	UINT strides = m_VertexStride;
+	UINT offsets = 0;
 	deviceContext->IASetVertexBuffers(0, 1, m_pVertexBuffer.GetAddressOf(), &strides, &offsets);
 	deviceContext->IASetIndexBuffer(m_pIndexBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
 
-	// Get previously bounded Constant buffer and modify it
-	ComPtr<ID3D11Buffer> cBuffer = nullptr;
-	deviceContext->VSGetConstantBuffers(0, 1, cBuffer.GetAddressOf());
-	CBChangesEveryDrawing cbDrawing;
-	XMMATRIX W = XMLoadFloat4x4(&m_world);
-	cbDrawing.world = XMMatrixTranspose(W);
-	cbDrawing.worldInvTranspose = XMMatrixInverse(nullptr, W);
-	cbDrawing.material = m_material;
+	// Update data and apply
+	effect.SetWorldMatrix(XMLoadFloat4x4(&m_world));
+	effect.SetTexture(m_pTexture.Get());
+	effect.SetMaterial(m_material);
+	effect.Apply(deviceContext);
 
-	// Update the Constant buffer
-	D3D11_MAPPED_SUBRESOURCE mappedData;
-	HR(deviceContext->Map(cBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedData));
-	memcpy_s(mappedData.pData, sizeof(CBChangesEveryDrawing), &cbDrawing, sizeof(CBChangesEveryDrawing));
-	deviceContext->Unmap(cBuffer.Get(), 0);
-
-	// Set texture
-	deviceContext->PSSetShaderResources(0, 1, m_pTexture.GetAddressOf());
-
-	// Draw
 	deviceContext->DrawIndexed(m_IndexCount, 0, 0);
 }
+
