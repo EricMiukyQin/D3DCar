@@ -44,6 +44,7 @@ public:
 	void Move(float dt);                            // Move (forward or backward)
 	void Turn(float& totalDegree, float dt);        // Turn (left or right, only when moving)
 	void Draw(ID3D11DeviceContext * deviceContext, BasicEffect& effect);
+	void SetMaterial(Material & material);          // Set material to all components
 	void SetMoveForward();                          // Set move state -- Forward
 	void SetMoveBackward();                         // Set move state -- Backward
 	void SetStop();                                 // Set move state -- Stop

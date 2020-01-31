@@ -24,9 +24,19 @@ DirectX::XMFLOAT3 Camera::GetPosition() const
 	return m_position;
 }
 
+DirectX::XMVECTOR Camera::GetPositionXM() const
+{
+	return XMLoadFloat3(&m_position);
+}
+
 DirectX::XMFLOAT3 Camera::GetRightVector() const
 {
 	return m_right;
+}
+
+DirectX::XMVECTOR Camera::GetRightVectorXM() const
+{
+	return XMLoadFloat3(&m_right);
 }
 
 DirectX::XMFLOAT3 Camera::GetUpVector() const
@@ -34,9 +44,19 @@ DirectX::XMFLOAT3 Camera::GetUpVector() const
 	return m_up;
 }
 
+DirectX::XMVECTOR Camera::GetUpVectorXM() const
+{
+	return XMLoadFloat3(&m_up);
+}
+
 DirectX::XMFLOAT3 Camera::GetLookVector() const
 {
 	return m_look;
+}
+
+DirectX::XMVECTOR Camera::GetLookVectorXM() const
+{
+	return XMLoadFloat3(&m_look);
 }
 
 float Camera::GetNearWindowWidth() const
@@ -64,9 +84,19 @@ DirectX::XMFLOAT4X4 Camera::GetViewMatrix() const
 	return m_view;
 }
 
+DirectX::XMMATRIX Camera::GetViewMatrixXM() const
+{
+	return XMLoadFloat4x4(&m_view);
+}
+
 DirectX::XMFLOAT4X4 Camera::GetProjMatrix() const
 {
 	return m_proj;
+}
+
+DirectX::XMMATRIX Camera::GetProjMatrixXM() const
+{
+	return XMLoadFloat4x4(&m_proj);
 }
 
 D3D11_VIEWPORT Camera::GetViewPort() const

@@ -14,6 +14,14 @@ App::App(HINSTANCE hInstance)
 	m_pCar = std::make_unique<CarModel>();
 	m_pRefObj = std::make_unique<D3DObject>();
 	m_pGrass = std::make_unique<D3DObject>();
+
+	m_normalMat.ambient = XMFLOAT4(0.5f, 0.5f, 0.5f, 1.0f);
+	m_normalMat.diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+	m_normalMat.specular = XMFLOAT4(0.2f, 0.2f, 0.2f, 16.0f);
+
+	m_shadowMat.ambient = XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f);
+	m_shadowMat.diffuse = XMFLOAT4(0.0f, 0.0f, 0.0f, 0.5f);
+	m_shadowMat.specular = XMFLOAT4(0.0f, 0.0f, 0.0f, 16.0f);
 }
 
 App::~App()
@@ -50,7 +58,7 @@ void App::OnResize()
 	{
 		m_pCamera->SetFrustum(XM_PI / 3, AspectRatio(), 0.5f, 1000.0f);
 		m_pCamera->SetViewPort(0.0f, 0.0f, (float)m_ClientWidth, (float)m_ClientHeight);
-		m_BasicEffect.SetProjMatrix(XMLoadFloat4x4(&m_pCamera->GetProjMatrix()));
+		m_BasicEffect.SetProjMatrix(m_pCamera->GetProjMatrixXM());
 	}
 }
 
@@ -93,7 +101,8 @@ void App::UpdateScene(float dt)
 	if (m_CameraMode == CameraMode::FirstPerson) {
 		// Set camera position
 		XMFLOAT3 cameraPos = m_pCar->GetPosition();
-		cameraPos.y += 2.0f;
+		cameraPos.x -= 2.5f;
+		cameraPos.y += 1.5f;
 		cam1st->SetPosition(cameraPos);
 
 		// Field of view rotation to prevent sudden rotation caused by too large difference
@@ -111,8 +120,8 @@ void App::UpdateScene(float dt)
 
 	// Update view matrix
 	m_pCamera->UpdateViewMatrix();
-	m_BasicEffect.SetViewMatrix(XMLoadFloat4x4(&m_pCamera->GetViewMatrix()));
-	m_BasicEffect.SetEyePos(XMLoadFloat3(&m_pCamera->GetPosition()));
+	m_BasicEffect.SetViewMatrix(m_pCamera->GetViewMatrixXM());
+	m_BasicEffect.SetEyePos(m_pCamera->GetPositionXM());
 
 	// Reset scroll wheel value
 	m_pMouse->ResetScrollWheelValue();
@@ -127,7 +136,7 @@ void App::UpdateScene(float dt)
 					cam1st->SetFrustum(XM_PI / 3, AspectRatio(), 0.5f, 1000.0f);
 					m_pCamera = cam1st;
 			}
-			cam1st->LookTo(XMFLOAT3(m_pCar->GetPosition().x, 2.0f, m_pCar->GetPosition().z), m_pCar->GetDirection(), XMFLOAT3(0.0f, 1.0f, 0.0f));
+			cam1st->LookTo(XMFLOAT3(m_pCar->GetPosition().x - 2.5f, 1.5f, m_pCar->GetPosition().z), m_pCar->GetDirection(), XMFLOAT3(0.0f, 1.0f, 0.0f));
 
 			m_CameraMode = CameraMode::FirstPerson;
 		}
@@ -140,7 +149,7 @@ void App::UpdateScene(float dt)
 				m_pCamera = cam3rd;
 			}
 			cam3rd->SetTargetPos(m_pCar->GetPosition());
-			cam3rd->SetDistance(8.0f);
+			cam3rd->SetDistance(12.0f);
 			cam3rd->SetDistanceMinMax(3.0f, 20.0f);
 
 			m_CameraMode = CameraMode::ThirdPerson;
@@ -169,6 +178,21 @@ void App::DrawScene()
 	m_pRefObj->Draw(m_pd3dImmediateContext.Get(), m_BasicEffect);
 	m_pGrass->Draw(m_pd3dImmediateContext.Get(), m_BasicEffect);
 
+	// ******************
+	// 2. Draw shadows of opaque normal objects
+	//
+	m_pRefObj->SetMaterial(m_shadowMat);
+	m_pCar->SetMaterial(m_shadowMat);
+	m_BasicEffect.SetShadowState(true);
+	m_BasicEffect.SetRenderNoDoubleBlend(m_pd3dImmediateContext.Get(), 0);
+
+	m_pCar->Draw(m_pd3dImmediateContext.Get(), m_BasicEffect);
+	m_pRefObj->Draw(m_pd3dImmediateContext.Get(), m_BasicEffect);
+
+	m_BasicEffect.SetShadowState(false);
+	m_pRefObj->SetMaterial(m_normalMat);  // Set back
+	m_pCar->SetMaterial(m_normalMat);
+
 	m_pSwapChain->Present(0, 0);
 }
 
@@ -177,47 +201,44 @@ bool App::InitResource()
 	// ******************
 	// Initialize objects
 	//
+	m_pCar->SetMaterial(m_normalMat);
 	m_pCar->CreateCar(m_pd3dDevice.Get());
-
-	Material material{};  // Material same as car's
-	material.ambient = XMFLOAT4(0.5f, 0.5f, 0.5f, 1.0f);
-	material.diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
-	material.specular = XMFLOAT4(0.2f, 0.2f, 0.2f, 16.0f);
 
 	// RefObj
 	ComPtr<ID3D11ShaderResourceView> texture;
 	HR(CreateDDSTextureFromFile(m_pd3dDevice.Get(), L"Texture\\WoodCrate.dds", nullptr, texture.GetAddressOf()));
 	m_pRefObj->SetBuffer(m_pd3dDevice.Get(), Geometry::CreateBox());
-	m_pRefObj->SetWorldMatrix(XMMatrixTranslation(-30.0f, 0.0f, 0.0f));
+	m_pRefObj->SetWorldMatrix(XMMatrixTranslation(-5.0f, -1.0f, 0.0f));
 	m_pRefObj->SetTexture(texture.Get());
-	m_pRefObj->SetMaterial(material);
+	m_pRefObj->SetMaterial(m_normalMat);
 
-	// Grass
+	// Ground
 	HR(CreateDDSTextureFromFile(m_pd3dDevice.Get(), L"Texture\\Ground.dds", nullptr, texture.ReleaseAndGetAddressOf()));
 	m_pGrass->SetBuffer(m_pd3dDevice.Get(),
 		Geometry::CreatePlane(XMFLOAT2(1000.0f, 1000.0f), XMFLOAT2(50.0f, 50.0f)));
 	m_pGrass->SetWorldMatrix(XMMatrixTranslation(0.0f, -2.0f, 0.0f));
 	m_pGrass->SetTexture(texture.Get());
-	m_pGrass->SetMaterial(material);
+	m_pGrass->SetMaterial(m_normalMat);
 
 	// ******************
 	// Initialize camera
 	//
-	m_CameraMode = CameraMode::FirstPerson;
-	auto camera = std::shared_ptr<FirstPersonCamera>(new FirstPersonCamera);
-	m_pCamera = camera;
-	camera->SetViewPort(0.0f, 0.0f, (float)m_ClientWidth, (float)m_ClientHeight);
-	camera->LookTo(XMFLOAT3(m_pCar->GetPosition().x, 2.0f, m_pCar->GetPosition().z), m_pCar->GetDirection(), XMFLOAT3(0.0f, 1.0f, 0.0f));
+	InitFirstPersonCamera();
 
-	m_BasicEffect.SetViewMatrix(XMLoadFloat4x4(&m_pCamera->GetViewMatrix()));
-	m_BasicEffect.SetEyePos(XMLoadFloat3(&m_pCamera->GetPosition()));
+	m_BasicEffect.SetViewMatrix(m_pCamera->GetViewMatrixXM());
+	m_BasicEffect.SetEyePos(m_pCamera->GetPositionXM());
 
 	m_pCamera->SetFrustum(XM_PI / 3, AspectRatio(), 0.5f, 1000.0f);
-	m_BasicEffect.SetProjMatrix(XMLoadFloat4x4(&m_pCamera->GetProjMatrix()));
+	m_BasicEffect.SetProjMatrix(m_pCamera->GetProjMatrixXM());
 
 	// ******************
 	// Initialize non-change value
 	//
+
+	// Slightly higher to show shadows
+	m_BasicEffect.SetShadowMatrix(XMMatrixShadow(XMVectorSet(0.0f, 0.5f, 0.0f, 0.99f), XMVectorSet(0.0f, 10.0f, -10.0f, 1.0f)));
+	m_BasicEffect.SetRefShadowMatrix(XMMatrixShadow(XMVectorSet(0.0f, 0.5f, 0.0f, 0.99f), XMVectorSet(0.0f, 10.0f, 30.0f, 1.0f)));
+
 	// dirLight
 	DirectionalLight dirLight;
 	dirLight.ambient = XMFLOAT4(0.5f, 0.5f, 0.5f, 1.0f);
@@ -236,5 +257,20 @@ bool App::InitResource()
 	m_BasicEffect.SetPointLight(0, pointLight);
 
 	return true;
+}
+
+void App::InitFirstPersonCamera()
+{
+	m_CameraMode = CameraMode::FirstPerson;
+	auto camera = std::shared_ptr<FirstPersonCamera>(new FirstPersonCamera);
+	m_pCamera = camera;
+	camera->SetViewPort(0.0f, 0.0f, (float)m_ClientWidth, (float)m_ClientHeight);
+
+	// Set camera position
+	XMFLOAT3 cameraPos = m_pCar->GetPosition();
+	cameraPos.x -= 2.5f;
+	cameraPos.y += 1.5f;
+	camera->SetPosition(cameraPos);
+	camera->LookTo(camera->GetPosition(), m_pCar->GetDirection(), XMFLOAT3(0.0f, 1.0f, 0.0f));
 }
 

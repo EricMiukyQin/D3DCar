@@ -161,6 +161,13 @@ void CarModel::Draw(ID3D11DeviceContext * deviceContext, BasicEffect& effect)
 	}
 }
 
+void CarModel::SetMaterial(Material & material)
+{
+	for (int i = 0; i < NUM_PARTS_CAR; ++i) {
+		m_car[i]->SetMaterial(material);
+	}
+}
+
 void CarModel::SetMoveForward()
 {
 	m_car_state = MoveState::Forward;
@@ -185,13 +192,6 @@ void CarModel::CreateCarBase(ID3D11Device* device)
 	XMStoreFloat4x4(&m_car[0]->local_scale, XMMatrixScaling(4.0f, 0.5f, 2.0f));
 	m_car[0]->UpdateLocalWorldMatrix();
 
-	// Set Material
-	Material material;
-	material.ambient = XMFLOAT4(0.5f, 0.5f, 0.5f, 1.0f);
-	material.diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
-	material.specular = XMFLOAT4(0.2f, 0.2f, 0.2f, 16.0f);
-	m_car[0]->SetMaterial(material);
-
 	// Set texture
 	ComPtr<ID3D11ShaderResourceView> texture;
 	HR(CreateDDSTextureFromFile(device, L"Texture\\car\\car_base.dds", nullptr, texture.GetAddressOf()));
@@ -207,13 +207,6 @@ void CarModel::CreateCarBody(ID3D11Device * device)
 	XMStoreFloat4x4(&m_car[1]->local_scale, XMMatrixScaling(3.0f, 0.5f, 2.0f));
 	XMStoreFloat4x4(&m_car[1]->local_trans, XMMatrixTranslation(0.0f, 1.0f, 0.0f));
 	m_car[1]->UpdateLocalWorldMatrix();
-
-	// Set Material
-	Material material;
-	material.ambient = XMFLOAT4(0.5f, 0.5f, 0.5f, 1.0f);
-	material.diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
-	material.specular = XMFLOAT4(0.2f, 0.2f, 0.2f, 16.0f);
-	m_car[1]->SetMaterial(material);
 
 	// Set texture
 	ComPtr<ID3D11ShaderResourceView> texture;
@@ -232,13 +225,6 @@ void CarModel::CreateFrontLeftWheel(ID3D11Device * device)
 	XMStoreFloat4x4(&m_car[2]->local_trans, XMMatrixTranslation(-3.0f, -1.0f, -2.0f));
 	m_car[2]->UpdateLocalWorldMatrix();
 
-	// Set Material
-	Material material;
-	material.ambient = XMFLOAT4(0.5f, 0.5f, 0.5f, 1.0f);
-	material.diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
-	material.specular = XMFLOAT4(0.2f, 0.2f, 0.2f, 16.0f);
-	m_car[2]->SetMaterial(material);
-
 	// Set texture
 	ComPtr<ID3D11ShaderResourceView> texture;
 	HR(CreateDDSTextureFromFile(device, L"Texture\\car\\car_wheel.dds", nullptr, texture.GetAddressOf()));
@@ -255,13 +241,6 @@ void CarModel::CreateFrontRightWheel(ID3D11Device * device)
 	XMStoreFloat4x4(&m_car[3]->local_rot, XMMatrixRotationX(XMConvertToRadians(90.0f)));
 	XMStoreFloat4x4(&m_car[3]->local_trans, XMMatrixTranslation(-3.0f, -1.0f, 2.0f));
 	m_car[3]->UpdateLocalWorldMatrix();
-
-	// Set Material
-	Material material;
-	material.ambient = XMFLOAT4(0.5f, 0.5f, 0.5f, 1.0f);
-	material.diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
-	material.specular = XMFLOAT4(0.2f, 0.2f, 0.2f, 16.0f);
-	m_car[3]->SetMaterial(material);
 
 	// Set texture
 	ComPtr<ID3D11ShaderResourceView> texture;
@@ -280,13 +259,6 @@ void CarModel::CreateBackLeftWheel(ID3D11Device * device)
 	XMStoreFloat4x4(&m_car[4]->local_trans, XMMatrixTranslation(3.0f, -1.0f, -2.0f));
 	m_car[4]->UpdateLocalWorldMatrix();
 
-	// Set Material
-	Material material;
-	material.ambient = XMFLOAT4(0.5f, 0.5f, 0.5f, 1.0f);
-	material.diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
-	material.specular = XMFLOAT4(0.2f, 0.2f, 0.2f, 16.0f);
-	m_car[4]->SetMaterial(material);
-
 	// Set texture
 	ComPtr<ID3D11ShaderResourceView> texture;
 	HR(CreateDDSTextureFromFile(device, L"Texture\\car\\car_wheel.dds", nullptr, texture.GetAddressOf()));
@@ -303,13 +275,6 @@ void CarModel::CreateBackRightWheel(ID3D11Device * device)
 	XMStoreFloat4x4(&m_car[5]->local_rot, XMMatrixRotationX(XMConvertToRadians(90.0f)));
 	XMStoreFloat4x4(&m_car[5]->local_trans, XMMatrixTranslation(3.0f, -1.0f, 2.0f));
 	m_car[5]->UpdateLocalWorldMatrix();
-
-	// Set Material
-	Material material;
-	material.ambient = XMFLOAT4(0.5f, 0.5f, 0.5f, 1.0f);
-	material.diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
-	material.specular = XMFLOAT4(0.2f, 0.2f, 0.2f, 16.0f);
-	m_car[5]->SetMaterial(material);
 
 	// Set texture
 	ComPtr<ID3D11ShaderResourceView> texture;

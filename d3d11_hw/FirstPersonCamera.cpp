@@ -47,13 +47,18 @@ void FirstPersonCamera::SetPosition(const XMFLOAT3 & pos)
 
 void FirstPersonCamera::LookTo(const XMFLOAT3 & pos, const XMFLOAT3 & to, const XMFLOAT3 & up)
 {
+	LookTo(XMLoadFloat3(&pos), XMLoadFloat3(&to), XMLoadFloat3(&up));
+}
+
+void XM_CALLCONV FirstPersonCamera::LookTo(const DirectX::FXMVECTOR & pos, const DirectX::FXMVECTOR & to, const DirectX::FXMVECTOR & up)
+{
 	// Calculate L, U, R (all normalized)
-	XMVECTOR L = XMVector3Normalize(XMLoadFloat3(&to));
-	XMVECTOR R = XMVector3Normalize(XMVector3Cross(XMLoadFloat3(&up), L));
+	XMVECTOR L = XMVector3Normalize(to);
+	XMVECTOR R = XMVector3Normalize(XMVector3Cross(up, L));
 	XMVECTOR U = XMVector3Cross(L, R);
 
 	// Update m_position, m_look, m_right and m_up
-	m_position = pos;
+	XMStoreFloat3(&m_position, pos);
 	XMStoreFloat3(&m_look, L);
 	XMStoreFloat3(&m_right, R);
 	XMStoreFloat3(&m_up, U);

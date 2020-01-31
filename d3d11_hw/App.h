@@ -26,11 +26,15 @@ public:
 
 private:
 	bool InitResource();
+	void InitFirstPersonCamera();
 
 private:
 	std::unique_ptr<CarModel> m_pCar;             // Car model
 	std::unique_ptr<D3DObject> m_pRefObj;         // Refer object
 	std::unique_ptr<D3DObject> m_pGrass;          // Grass object
+
+	Material m_shadowMat;                         // Shadow material
+	Material m_normalMat;					      // Normal material
 
 	BasicEffect m_BasicEffect;					  // Object rendering effects management
 
