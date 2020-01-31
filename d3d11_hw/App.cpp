@@ -1,6 +1,7 @@
 #include "App.h"
 #include "d3dUtil.h"
 #include "Vertex.h"
+#include "RenderStates.h"
 #include "FirstPersonCamera.h"
 #include "ThirdPersonCamera.h"
 
@@ -166,9 +167,21 @@ void App::DrawScene()
 	m_pd3dImmediateContext->ClearRenderTargetView(m_pRenderTargetView.Get(), reinterpret_cast<const float*>(&black));
 	m_pd3dImmediateContext->ClearDepthStencilView(m_pDepthStencilView.Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
+	// ********************
+	// 1. Draw non-transparent objects
+	//
+	m_pd3dImmediateContext->RSSetState(nullptr);
+	m_pd3dImmediateContext->OMSetBlendState(nullptr, nullptr, 0xFFFFFFFF);
+
 	m_pCar->Draw(m_pd3dImmediateContext.Get());
 	m_pRefObj->Draw(m_pd3dImmediateContext.Get());
 	m_pGrass->Draw(m_pd3dImmediateContext.Get());
+
+	//// ********************
+	//// 2. Draw transparent objects
+	////
+	//m_pd3dImmediateContext->RSSetState(RenderStates::RSNoCull.Get());
+	//m_pd3dImmediateContext->OMSetBlendState(RenderStates::BSTransparent.Get(), nullptr, 0xFFFFFFFF);
 
 	m_pSwapChain->Present(0, 0);
 }
@@ -217,35 +230,28 @@ bool App::InitResource()
 	// Create objects in game world
 	m_pCar->CreateCar(m_pd3dDevice.Get());
 
+	Material material{};  // Material same as car's
+	material.ambient = XMFLOAT4(0.5f, 0.5f, 0.5f, 1.0f);
+	material.diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+	material.specular = XMFLOAT4(0.2f, 0.2f, 0.2f, 16.0f);
+
 	// RefObj
 	ComPtr<ID3D11ShaderResourceView> texture;
 	HR(CreateDDSTextureFromFile(m_pd3dDevice.Get(), L"Texture\\WoodCrate.dds", nullptr, texture.GetAddressOf()));
 	m_pRefObj->SetBuffer(m_pd3dDevice.Get(), Geometry::CreateBox());
 	m_pRefObj->SetWorldMatrix(XMMatrixTranslation(-30.0f, 0.0f, 0.0f));
 	m_pRefObj->SetTexture(texture.Get());
+	m_pRefObj->SetMaterial(material);
 
 	// Grass
 	HR(CreateDDSTextureFromFile(m_pd3dDevice.Get(), L"Texture\\Grass.dds", nullptr, texture.ReleaseAndGetAddressOf()));
 	m_pGrass->SetBuffer(m_pd3dDevice.Get(),
 		Geometry::CreatePlane(XMFLOAT2(1000.0f, 1000.0f), XMFLOAT2(100.0f, 100.0f)));
-	m_pGrass->SetTexture(texture.Get());
 	m_pGrass->SetWorldMatrix(XMMatrixTranslation(0.0f, -2.0f, 0.0f));
+	m_pGrass->SetTexture(texture.Get());
+	m_pGrass->SetMaterial(material);
 
-	// ******************
-	// Initialize the sampler state
-	D3D11_SAMPLER_DESC sampDesc;
-	ZeroMemory(&sampDesc, sizeof(sampDesc));
-	sampDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
-	sampDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
-	sampDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
-	sampDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
-	sampDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
-	sampDesc.MinLOD = 0;
-	sampDesc.MaxLOD = D3D11_FLOAT32_MAX;
-	HR(m_pd3dDevice->CreateSamplerState(&sampDesc, m_pSamplerState.GetAddressOf()));
-
-
-
+	///////// Initialize value in constant buffer
 
 	// Initialize camera
 	m_CameraMode = CameraMode::FirstPerson;
@@ -253,8 +259,6 @@ bool App::InitResource()
 	m_pCamera = camera;
 	camera->SetViewPort(0.0f, 0.0f, (float)m_ClientWidth, (float)m_ClientHeight);
 	camera->LookTo(XMFLOAT3(m_pCar->GetPosition().x, 2.0f, m_pCar->GetPosition().z), m_pCar->GetDirection(), XMFLOAT3(0.0f, 1.0f, 0.0f));
-
-	///////// Initialize value in constant buffer
 
 	// Initialize value that changes when window resize
 	m_pCamera->SetFrustum(XM_PI / 3, AspectRatio(), 0.5f, 1000.0f);
@@ -276,10 +280,6 @@ bool App::InitResource()
 	m_CBRarely.numDirLight = 1;
 	m_CBRarely.numPointLight = 1;
 	m_CBRarely.numSpotLight = 0;
-	// Material
-	m_CBRarely.material.ambient = XMFLOAT4(0.5f, 0.5f, 0.5f, 1.0f);
-	m_CBRarely.material.diffuse = XMFLOAT4(0.6f, 0.6f, 0.6f, 1.0f);
-	m_CBRarely.material.specular = XMFLOAT4(0.1f, 0.1f, 0.1f, 50.0f);
 
 	///////////// Update constant buffer
 	D3D11_MAPPED_SUBRESOURCE mappedData;
@@ -291,22 +291,29 @@ bool App::InitResource()
 	memcpy_s(mappedData.pData, sizeof(CBChangesRarely), &m_CBRarely, sizeof(CBChangesRarely));
 	m_pd3dImmediateContext->Unmap(m_pConstantBuffers[3].Get(), 0);
 
+	// Initialize all render states
+	RenderStates::InitAll(m_pd3dDevice.Get());
 
 	// Bind the required resources to each stage of the rendering pipeline
 	// Set the element type and input layout
 	m_pd3dImmediateContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	m_pd3dImmediateContext->IASetInputLayout(m_pVertexLayout.Get());
-	// Bind vertex shader
-	m_pd3dImmediateContext->VSSetShader(m_pVertexShader.Get(), nullptr, 0);
-	// Binding the respective required buffers in advance, where the buffer updated every frame needs to be bound to two buffers
+
+	// Bind constant buffers and shaders
 	m_pd3dImmediateContext->VSSetConstantBuffers(0, 1, m_pConstantBuffers[0].GetAddressOf());
 	m_pd3dImmediateContext->VSSetConstantBuffers(1, 1, m_pConstantBuffers[1].GetAddressOf());
 	m_pd3dImmediateContext->VSSetConstantBuffers(2, 1, m_pConstantBuffers[2].GetAddressOf());
+	m_pd3dImmediateContext->VSSetShader(m_pVertexShader.Get(), nullptr, 0);
 
+	m_pd3dImmediateContext->RSSetState(RenderStates::RSNoCull.Get());
+
+	m_pd3dImmediateContext->PSSetConstantBuffers(0, 1, m_pConstantBuffers[0].GetAddressOf());
 	m_pd3dImmediateContext->PSSetConstantBuffers(1, 1, m_pConstantBuffers[1].GetAddressOf());
 	m_pd3dImmediateContext->PSSetConstantBuffers(3, 1, m_pConstantBuffers[3].GetAddressOf());
 	m_pd3dImmediateContext->PSSetShader(m_pPixelShader.Get(), nullptr, 0);
-	m_pd3dImmediateContext->PSSetSamplers(0, 1, m_pSamplerState.GetAddressOf());
+
+	m_pd3dImmediateContext->PSSetSamplers(0, 1, RenderStates::SSLinearWrap.GetAddressOf());
+	m_pd3dImmediateContext->OMSetBlendState(RenderStates::BSTransparent.Get(), nullptr, 0xFFFFFFFF);
 
 	return true;
 }

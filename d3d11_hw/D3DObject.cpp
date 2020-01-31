@@ -53,11 +53,10 @@ void D3DObject::Draw(ID3D11DeviceContext* deviceContext)
 	ComPtr<ID3D11Buffer> cBuffer = nullptr;
 	deviceContext->VSGetConstantBuffers(0, 1, cBuffer.GetAddressOf());
 	CBChangesEveryDrawing cbDrawing;
-
-	// Transpose
 	XMMATRIX W = XMLoadFloat4x4(&m_world);
 	cbDrawing.world = XMMatrixTranspose(W);
 	cbDrawing.worldInvTranspose = XMMatrixInverse(nullptr, W);
+	cbDrawing.material = m_material;
 
 	// Update the Constant buffer
 	D3D11_MAPPED_SUBRESOURCE mappedData;

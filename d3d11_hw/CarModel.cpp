@@ -187,9 +187,9 @@ void CarModel::CreateCarBase(ID3D11Device* device)
 
 	// Set Material
 	Material material;
-	material.ambient = XMFLOAT4(0.4f, 0.4f, 0.4f, 1.0f);
-	material.diffuse = XMFLOAT4(0.8f, 0.8f, 0.8f, 1.0f);
-	material.specular = XMFLOAT4(0.1f, 0.1f, 0.1f, 16.0f);
+	material.ambient = XMFLOAT4(0.5f, 0.5f, 0.5f, 1.0f);
+	material.diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+	material.specular = XMFLOAT4(0.2f, 0.2f, 0.2f, 16.0f);
 	m_car[0]->SetMaterial(material);
 
 	// Set texture
@@ -210,9 +210,9 @@ void CarModel::CreateCarBody(ID3D11Device * device)
 
 	// Set Material
 	Material material;
-	material.ambient = XMFLOAT4(0.4f, 0.4f, 0.4f, 1.0f);
-	material.diffuse = XMFLOAT4(0.8f, 0.8f, 0.8f, 1.0f);
-	material.specular = XMFLOAT4(0.1f, 0.1f, 0.1f, 16.0f);
+	material.ambient = XMFLOAT4(0.5f, 0.5f, 0.5f, 1.0f);
+	material.diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+	material.specular = XMFLOAT4(0.2f, 0.2f, 0.2f, 16.0f);
 	m_car[1]->SetMaterial(material);
 
 	// Set texture
@@ -234,9 +234,9 @@ void CarModel::CreateFrontLeftWheel(ID3D11Device * device)
 
 	// Set Material
 	Material material;
-	material.ambient = XMFLOAT4(0.4f, 0.4f, 0.4f, 1.0f);
-	material.diffuse = XMFLOAT4(0.8f, 0.8f, 0.8f, 1.0f);
-	material.specular = XMFLOAT4(0.1f, 0.1f, 0.1f, 16.0f);
+	material.ambient = XMFLOAT4(0.5f, 0.5f, 0.5f, 1.0f);
+	material.diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+	material.specular = XMFLOAT4(0.2f, 0.2f, 0.2f, 16.0f);
 	m_car[2]->SetMaterial(material);
 
 	// Set texture
@@ -258,9 +258,9 @@ void CarModel::CreateFrontRightWheel(ID3D11Device * device)
 
 	// Set Material
 	Material material;
-	material.ambient = XMFLOAT4(0.4f, 0.4f, 0.4f, 1.0f);
-	material.diffuse = XMFLOAT4(0.8f, 0.8f, 0.8f, 1.0f);
-	material.specular = XMFLOAT4(0.1f, 0.1f, 0.1f, 16.0f);
+	material.ambient = XMFLOAT4(0.5f, 0.5f, 0.5f, 1.0f);
+	material.diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+	material.specular = XMFLOAT4(0.2f, 0.2f, 0.2f, 16.0f);
 	m_car[3]->SetMaterial(material);
 
 	// Set texture
@@ -282,9 +282,9 @@ void CarModel::CreateBackLeftWheel(ID3D11Device * device)
 
 	// Set Material
 	Material material;
-	material.ambient = XMFLOAT4(0.4f, 0.4f, 0.4f, 1.0f);
-	material.diffuse = XMFLOAT4(0.8f, 0.8f, 0.8f, 1.0f);
-	material.specular = XMFLOAT4(0.1f, 0.1f, 0.1f, 16.0f);
+	material.ambient = XMFLOAT4(0.5f, 0.5f, 0.5f, 1.0f);
+	material.diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+	material.specular = XMFLOAT4(0.2f, 0.2f, 0.2f, 16.0f);
 	m_car[4]->SetMaterial(material);
 
 	// Set texture
@@ -306,9 +306,9 @@ void CarModel::CreateBackRightWheel(ID3D11Device * device)
 
 	// Set Material
 	Material material;
-	material.ambient = XMFLOAT4(0.4f, 0.4f, 0.4f, 1.0f);
-	material.diffuse = XMFLOAT4(0.8f, 0.8f, 0.8f, 1.0f);
-	material.specular = XMFLOAT4(0.1f, 0.1f, 0.1f, 16.0f);
+	material.ambient = XMFLOAT4(0.5f, 0.5f, 0.5f, 1.0f);
+	material.diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+	material.specular = XMFLOAT4(0.2f, 0.2f, 0.2f, 16.0f);
 	m_car[5]->SetMaterial(material);
 
 	// Set texture

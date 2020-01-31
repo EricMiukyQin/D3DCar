@@ -17,6 +17,7 @@ protected:
 	struct CBChangesEveryDrawing {
 		DirectX::XMMATRIX world;
 		DirectX::XMMATRIX worldInvTranspose;
+		Material material;
 	};
 
 	struct CBChangesEveryFrame {
@@ -32,11 +33,10 @@ protected:
 		DirectionalLight dirLight[10];
 		PointLight pointLight[10];
 		SpotLight spotLight[10];
-		Material material;
 		int numDirLight;
 		int numPointLight;
 		int numSpotLight;
-		float pad;                          // Packing guarantees 16-byte alignment
+		int pad;
 	};
 
 public:
