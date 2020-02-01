@@ -13,7 +13,8 @@ App::App(HINSTANCE hInstance)
 {
 	m_pCar = std::make_unique<CarModel>();
 	m_pRefObj = std::make_unique<D3DObject>();
-	m_pGrass = std::make_unique<D3DObject>();
+	m_pGound = std::make_unique<D3DObject>();
+	m_pHouse = std::make_unique<D3DObject>();
 
 	m_normalMat.ambient = XMFLOAT4(0.5f, 0.5f, 0.5f, 1.0f);
 	m_normalMat.diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
@@ -176,22 +177,28 @@ void App::DrawScene()
 
 	m_pCar->Draw(m_pd3dImmediateContext.Get(), m_BasicEffect);
 	m_pRefObj->Draw(m_pd3dImmediateContext.Get(), m_BasicEffect);
-	m_pGrass->Draw(m_pd3dImmediateContext.Get(), m_BasicEffect);
+	m_pGound->Draw(m_pd3dImmediateContext.Get(), m_BasicEffect);
+	m_pHouse->Draw(m_pd3dImmediateContext.Get(), m_BasicEffect);
 
 	// ******************
 	// 2. Draw shadows of opaque normal objects
 	//
-	m_pRefObj->SetMaterial(m_shadowMat);
-	m_pCar->SetMaterial(m_shadowMat);
+
 	m_BasicEffect.SetShadowState(true);
 	m_BasicEffect.SetRenderNoDoubleBlend(m_pd3dImmediateContext.Get(), 0);
 
+	m_pRefObj->SetMaterial(m_shadowMat);
+	m_pCar->SetMaterial(m_shadowMat);
+	m_pHouse->SetMaterials(houseShadowMat);
+
 	m_pCar->Draw(m_pd3dImmediateContext.Get(), m_BasicEffect);
 	m_pRefObj->Draw(m_pd3dImmediateContext.Get(), m_BasicEffect);
+	m_pHouse->Draw(m_pd3dImmediateContext.Get(), m_BasicEffect);
 
 	m_BasicEffect.SetShadowState(false);
 	m_pRefObj->SetMaterial(m_normalMat);  // Set back
 	m_pCar->SetMaterial(m_normalMat);
+	m_pHouse->SetMaterials(houseMat);
 
 	m_pSwapChain->Present(0, 0);
 }
@@ -207,18 +214,30 @@ bool App::InitResource()
 	// RefObj
 	ComPtr<ID3D11ShaderResourceView> texture;
 	HR(CreateDDSTextureFromFile(m_pd3dDevice.Get(), L"Texture\\WoodCrate.dds", nullptr, texture.GetAddressOf()));
-	m_pRefObj->SetBuffer(m_pd3dDevice.Get(), Geometry::CreateBox());
+	m_pRefObj->SetModel(Model(m_pd3dDevice.Get(), Geometry::CreateBox()));
 	m_pRefObj->SetWorldMatrix(XMMatrixTranslation(-5.0f, -1.0f, 0.0f));
 	m_pRefObj->SetTexture(texture.Get());
 	m_pRefObj->SetMaterial(m_normalMat);
 
 	// Ground
 	HR(CreateDDSTextureFromFile(m_pd3dDevice.Get(), L"Texture\\Ground.dds", nullptr, texture.ReleaseAndGetAddressOf()));
-	m_pGrass->SetBuffer(m_pd3dDevice.Get(),
-		Geometry::CreatePlane(XMFLOAT2(1000.0f, 1000.0f), XMFLOAT2(50.0f, 50.0f)));
-	m_pGrass->SetWorldMatrix(XMMatrixTranslation(0.0f, -2.0f, 0.0f));
-	m_pGrass->SetTexture(texture.Get());
-	m_pGrass->SetMaterial(m_normalMat);
+	m_pGound->SetModel(Model(m_pd3dDevice.Get(),
+		Geometry::CreatePlane(XMFLOAT2(10000.0f, 10000.0f), XMFLOAT2(500.0f, 500.0f))));
+	m_pGound->SetWorldMatrix(XMMatrixTranslation(0.0f, -2.0f, 0.0f));
+	m_pGound->SetTexture(texture.Get());
+	m_pGound->SetMaterial(m_normalMat);
+
+	// House
+	m_ObjReader.Read(L"Model\\house.mbo", L"Model\\house.obj");
+	m_pHouse->SetModel(Model(m_pd3dDevice.Get(), m_ObjReader));
+	m_pHouse->GetMaterials(houseMat);
+	houseShadowMat = std::vector<Material> {houseMat.size(), m_shadowMat};
+
+	XMMATRIX S = XMMatrixScaling(0.2f, 0.2f, 0.2f);
+	BoundingBox houseBox = m_pHouse->GetLocalBoundingBox();
+	houseBox.Transform(houseBox, S);
+
+	m_pHouse->SetWorldMatrix(S * XMMatrixTranslation(-70.0f, -(houseBox.Center.y - houseBox.Extents.y + 1.0f) - 1.0f, 70.0f));
 
 	// ******************
 	// Initialize camera

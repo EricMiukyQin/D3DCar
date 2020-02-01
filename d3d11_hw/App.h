@@ -2,6 +2,7 @@
 
 #include "d3dApp.h"
 #include "CarModel.h"
+#include "ObjReader.h"
 #include "D3DObject.h"
 
 class Camera;
@@ -31,14 +32,19 @@ private:
 private:
 	std::unique_ptr<CarModel> m_pCar;             // Car model
 	std::unique_ptr<D3DObject> m_pRefObj;         // Refer object
-	std::unique_ptr<D3DObject> m_pGrass;          // Grass object
+	std::unique_ptr<D3DObject> m_pGound;          // Grass object
+	std::unique_ptr<D3DObject> m_pHouse;			  // House
 
 	Material m_shadowMat;                         // Shadow material
 	Material m_normalMat;					      // Normal material
+	std::vector<Material> houseMat;
+	std::vector<Material> houseShadowMat;
 
 	BasicEffect m_BasicEffect;					  // Object rendering effects management
 
 	std::shared_ptr<Camera> m_pCamera;			  // Camera
 	CameraMode m_CameraMode;					  // Camera mode
+
+	ObjReader m_ObjReader;						  // Model ObjReader
 };
 

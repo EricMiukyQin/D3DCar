@@ -1,4 +1,5 @@
 #include "CarModel.h"
+#include "DXTrace.h"
 #include "DDSTextureLoader.h"
 
 using namespace DirectX;
@@ -185,8 +186,8 @@ void CarModel::SetStop()
 
 void CarModel::CreateCarBase(ID3D11Device* device)
 {
-	// Set buffer
-	m_car[0]->SetBuffer(device, Geometry::CreateBox());
+	// Set model
+	m_car[0]->SetModel(Model(device, Geometry::CreateBox()));
 
 	// Set local matrices
 	XMStoreFloat4x4(&m_car[0]->local_scale, XMMatrixScaling(4.0f, 0.5f, 2.0f));
@@ -200,8 +201,8 @@ void CarModel::CreateCarBase(ID3D11Device* device)
 
 void CarModel::CreateCarBody(ID3D11Device * device)
 {
-	// Set buffer
-	m_car[1]->SetBuffer(device, Geometry::CreateBox());
+	// Set model
+	m_car[1]->SetModel(Model(device, Geometry::CreateBox()));
 
 	// Set local matrices
 	XMStoreFloat4x4(&m_car[1]->local_scale, XMMatrixScaling(3.0f, 0.5f, 2.0f));
@@ -216,8 +217,8 @@ void CarModel::CreateCarBody(ID3D11Device * device)
 
 void CarModel::CreateFrontLeftWheel(ID3D11Device * device)
 {
-	// Set buffer
-	m_car[2]->SetBuffer(device, Geometry::CreateCylinder());
+	// Set model
+	m_car[2]->SetModel(Model(device, Geometry::CreateCylinder()));
 
 	// Set local matrices
 	XMStoreFloat4x4(&m_car[2]->local_scale, XMMatrixScaling(0.8f, 0.25f, 0.8f));
@@ -233,8 +234,8 @@ void CarModel::CreateFrontLeftWheel(ID3D11Device * device)
 
 void CarModel::CreateFrontRightWheel(ID3D11Device * device)
 {
-	// Set buffer
-	m_car[3]->SetBuffer(device, Geometry::CreateCylinder());
+	// Set model
+	m_car[3]->SetModel(Model(device, Geometry::CreateCylinder()));
 
 	// Set local matrices
 	XMStoreFloat4x4(&m_car[3]->local_scale, XMMatrixScaling(0.8f, 0.25f, 0.8f));
@@ -250,8 +251,8 @@ void CarModel::CreateFrontRightWheel(ID3D11Device * device)
 
 void CarModel::CreateBackLeftWheel(ID3D11Device * device)
 {
-	// Set buffer
-	m_car[4]->SetBuffer(device, Geometry::CreateCylinder());
+	// Set model
+	m_car[4]->SetModel(Model(device, Geometry::CreateCylinder()));
 
 	// Set local matrices
 	XMStoreFloat4x4(&m_car[4]->local_scale, XMMatrixScaling(0.8f, 0.25f, 0.8f));
@@ -267,8 +268,8 @@ void CarModel::CreateBackLeftWheel(ID3D11Device * device)
 
 void CarModel::CreateBackRightWheel(ID3D11Device * device)
 {
-	// Set buffer
-	m_car[5]->SetBuffer(device, Geometry::CreateCylinder());
+	// Set model
+	m_car[5]->SetModel(Model(device, Geometry::CreateCylinder()));
 
 	// Set local matrices
 	XMStoreFloat4x4(&m_car[5]->local_scale, XMMatrixScaling(0.8f, 0.25f, 0.8f));

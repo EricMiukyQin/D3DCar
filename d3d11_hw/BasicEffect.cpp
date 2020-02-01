@@ -160,11 +160,11 @@ bool BasicEffect::InitAll(ID3D11Device * device)
 
 
 	pImpl->m_pCBuffers.assign({
-		&pImpl->m_CBDrawing, 
-		&pImpl->m_CBFrame, 
-		&pImpl->m_CBStates, 
-		&pImpl->m_CBOnResize, 
-		&pImpl->m_CBRarely});
+		&pImpl->m_CBDrawing,
+		&pImpl->m_CBFrame,
+		&pImpl->m_CBStates,
+		&pImpl->m_CBOnResize,
+		&pImpl->m_CBRarely });
 
 	// 创建常量缓冲区
 	for (auto& pBuffer : pImpl->m_pCBuffers)
@@ -408,7 +408,3 @@ void BasicEffect::Apply(ID3D11DeviceContext * deviceContext)
 		}
 	}
 }
-
-
-
-

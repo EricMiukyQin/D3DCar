@@ -50,7 +50,7 @@ public:
 	// 获取单例
 	static BasicEffect& Get();
 
-	
+
 
 	// 初始化Basic.hlsli所需资源并初始化渲染状态
 	bool InitAll(ID3D11Device * device);
@@ -77,7 +77,7 @@ public:
 	// 2D混合绘制
 	void Set2DRenderAlphaBlend(ID3D11DeviceContext * deviceContext);
 
-	
+
 
 	//
 	// 矩阵设置
@@ -90,7 +90,7 @@ public:
 	void XM_CALLCONV SetReflectionMatrix(DirectX::FXMMATRIX R);
 	void XM_CALLCONV SetShadowMatrix(DirectX::FXMMATRIX S);
 	void XM_CALLCONV SetRefShadowMatrix(DirectX::FXMMATRIX RefS);
-	
+
 	//
 	// 光照、材质和纹理相关设置
 	//
@@ -116,11 +116,11 @@ public:
 
 	void SetReflectionState(bool isOn);
 	void SetShadowState(bool isOn);
-	
+
 
 	// 应用常量缓冲区和纹理资源的变更
 	void Apply(ID3D11DeviceContext * deviceContext);
-	
+
 private:
 	class Impl;
 	std::unique_ptr<Impl> pImpl;
