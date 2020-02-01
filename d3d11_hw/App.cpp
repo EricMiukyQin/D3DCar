@@ -11,8 +11,9 @@ App::App(HINSTANCE hInstance)
 	: D3DApp(hInstance),
 	m_CameraMode(CameraMode::FirstPerson)
 {
+	m_pDaylight = std::make_unique<SkyRender>();
+
 	m_pCar = std::make_unique<CarModel>();
-	m_pRefObj = std::make_unique<D3DObject>();
 	m_pGound = std::make_unique<D3DObject>();
 	m_pHouse = std::make_unique<D3DObject>();
 
@@ -38,6 +39,9 @@ bool App::Init()
 	RenderStates::InitAll(m_pd3dDevice.Get());
 
 	if (!m_BasicEffect.InitAll(m_pd3dDevice.Get()))
+		return false;
+
+	if (!m_SkyEffect.InitAll(m_pd3dDevice.Get()))
 		return false;
 
 	if (!InitResource())
@@ -176,7 +180,6 @@ void App::DrawScene()
 	m_BasicEffect.SetRenderDefault(m_pd3dImmediateContext.Get());
 
 	m_pCar->Draw(m_pd3dImmediateContext.Get(), m_BasicEffect);
-	m_pRefObj->Draw(m_pd3dImmediateContext.Get(), m_BasicEffect);
 	m_pGound->Draw(m_pd3dImmediateContext.Get(), m_BasicEffect);
 	m_pHouse->Draw(m_pd3dImmediateContext.Get(), m_BasicEffect);
 
@@ -187,18 +190,22 @@ void App::DrawScene()
 	m_BasicEffect.SetShadowState(true);
 	m_BasicEffect.SetRenderNoDoubleBlend(m_pd3dImmediateContext.Get(), 0);
 
-	m_pRefObj->SetMaterial(m_shadowMat);
 	m_pCar->SetMaterial(m_shadowMat);
 	m_pHouse->SetMaterials(houseShadowMat);
 
 	m_pCar->Draw(m_pd3dImmediateContext.Get(), m_BasicEffect);
-	m_pRefObj->Draw(m_pd3dImmediateContext.Get(), m_BasicEffect);
 	m_pHouse->Draw(m_pd3dImmediateContext.Get(), m_BasicEffect);
 
 	m_BasicEffect.SetShadowState(false);
-	m_pRefObj->SetMaterial(m_normalMat);  // Set back
 	m_pCar->SetMaterial(m_normalMat);
 	m_pHouse->SetMaterials(houseMat);
+
+
+	// ******************
+	// 3. Draw sky box
+	//
+	m_SkyEffect.SetRenderDefault(m_pd3dImmediateContext.Get());
+	m_pDaylight->Draw(m_pd3dImmediateContext.Get(), m_SkyEffect, *m_pCamera);
 
 	m_pSwapChain->Present(0, 0);
 }
@@ -206,20 +213,23 @@ void App::DrawScene()
 bool App::InitResource()
 {
 	// ******************
+	// Initialze skybox
+	//
+
+	HR(m_pDaylight->InitResource(m_pd3dDevice.Get(), m_pd3dImmediateContext.Get(),
+		L"Texture\\daylight.jpg",
+		5000.0f));
+
+	// ******************
 	// Initialize objects
 	//
+
+	// Car
 	m_pCar->SetMaterial(m_normalMat);
 	m_pCar->CreateCar(m_pd3dDevice.Get());
 
-	// RefObj
-	ComPtr<ID3D11ShaderResourceView> texture;
-	HR(CreateDDSTextureFromFile(m_pd3dDevice.Get(), L"Texture\\WoodCrate.dds", nullptr, texture.GetAddressOf()));
-	m_pRefObj->SetModel(Model(m_pd3dDevice.Get(), Geometry::CreateBox()));
-	m_pRefObj->SetWorldMatrix(XMMatrixTranslation(-5.0f, -1.0f, 0.0f));
-	m_pRefObj->SetTexture(texture.Get());
-	m_pRefObj->SetMaterial(m_normalMat);
-
 	// Ground
+	ComPtr<ID3D11ShaderResourceView> texture;
 	HR(CreateDDSTextureFromFile(m_pd3dDevice.Get(), L"Texture\\Ground.dds", nullptr, texture.ReleaseAndGetAddressOf()));
 	m_pGound->SetModel(Model(m_pd3dDevice.Get(),
 		Geometry::CreatePlane(XMFLOAT2(10000.0f, 10000.0f), XMFLOAT2(500.0f, 500.0f))));
@@ -272,7 +282,7 @@ bool App::InitResource()
 	pointLight.diffuse = XMFLOAT4(0.6f, 0.6f, 0.6f, 1.0f);
 	pointLight.specular = XMFLOAT4(0.2f, 0.2f, 0.2f, 1.0f);
 	pointLight.att = XMFLOAT3(0.0f, 0.1f, 0.0f);
-	pointLight.range = 25.0f;
+	pointLight.range = 2500.0f;
 	m_BasicEffect.SetPointLight(0, pointLight);
 
 	return true;

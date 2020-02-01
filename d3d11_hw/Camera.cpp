@@ -99,6 +99,11 @@ DirectX::XMMATRIX Camera::GetProjMatrixXM() const
 	return XMLoadFloat4x4(&m_proj);
 }
 
+DirectX::XMMATRIX Camera::GetViewProjXM() const
+{
+	return XMLoadFloat4x4(&m_view) * XMLoadFloat4x4(&m_proj);
+}
+
 D3D11_VIEWPORT Camera::GetViewPort() const
 {
 	return m_viewPort;

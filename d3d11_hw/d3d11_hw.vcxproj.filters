@@ -85,6 +85,12 @@
     <ClCompile Include="ObjReader.cpp">
       <Filter>Framework</Filter>
     </ClCompile>
+    <ClCompile Include="SkyRender.cpp">
+      <Filter>Framework</Filter>
+    </ClCompile>
+    <ClCompile Include="SkyEffect.cpp">
+      <Filter>Effects</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GameTimer.h">
@@ -153,12 +159,18 @@
     <ClInclude Include="ObjReader.h">
       <Filter>Framework</Filter>
     </ClInclude>
+    <ClInclude Include="SkyRender.h">
+      <Filter>Framework</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="HLSL\Basic.hlsli">
       <Filter>Shaders</Filter>
     </None>
     <None Include="HLSL\LightHelper.hlsli">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="HLSL\Sky.hlsli">
       <Filter>Shaders</Filter>
     </None>
   </ItemGroup>
@@ -173,6 +185,12 @@
       <Filter>Shaders</Filter>
     </FxCompile>
     <FxCompile Include="HLSL\Basic_VS_3D.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="HLSL\Sky_PS.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="HLSL\Sky_VS.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
   </ItemGroup>

@@ -36,6 +36,8 @@ public:
 	DirectX::XMFLOAT4X4 GetProjMatrix() const; // Get proj matrix
 	DirectX::XMMATRIX GetProjMatrixXM() const;
 
+	DirectX::XMMATRIX GetViewProjXM() const;
+
 	D3D11_VIEWPORT GetViewPort() const;        // Get view port
 
 	// Set view port
