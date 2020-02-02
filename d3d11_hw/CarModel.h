@@ -66,9 +66,9 @@ private:
 	DirectX::XMFLOAT3 m_car_position;                      // Position of car
 	DirectX::XMFLOAT3 m_car_headingDirection;              // Heading direction of car (normalized)
 	MoveState m_car_state;                                 // Car move state
-	
+
 	// Constant variables
-	const float moveSpeed = 3.0f;                          // Move speed of car
-	const float turnSpeed = 0.25f;                         // Turn speed of car
+	const float moveSpeed = 15.0f;                         // Move speed of car
+	const float turnSpeed = 0.5f;                          // Turn speed of car
 	const int NUM_PARTS_CAR = 6;                           // 6 parts: CarBase, CarBody, Front_Left_Wheel, Front_Right_Wheel, Back_Left_Wheel, Back_Right_Wheel
 };

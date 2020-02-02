@@ -11,11 +11,14 @@ App::App(HINSTANCE hInstance)
 	: D3DApp(hInstance),
 	m_CameraMode(CameraMode::FirstPerson)
 {
-	m_pDaylight = std::make_unique<SkyRender>();
-
 	m_pCar = std::make_unique<CarModel>();
-	m_pGound = std::make_unique<D3DObject>();
+	m_pRoad = std::make_unique<D3DObject>();
+	m_pGrass_l = std::make_unique<D3DObject>();
+	m_pGrass_r = std::make_unique<D3DObject>();
 	m_pHouse = std::make_unique<D3DObject>();
+	m_pTree = std::make_unique<D3DObject>();
+
+	m_pDaylight = std::make_unique<SkyRender>();
 
 	m_normalMat.ambient = XMFLOAT4(0.5f, 0.5f, 0.5f, 1.0f);
 	m_normalMat.diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
@@ -106,7 +109,6 @@ void App::UpdateScene(float dt)
 	if (m_CameraMode == CameraMode::FirstPerson) {
 		// Set camera position
 		XMFLOAT3 cameraPos = m_pCar->GetPosition();
-		cameraPos.x -= 2.5f;
 		cameraPos.y += 1.5f;
 		cam1st->SetPosition(cameraPos);
 
@@ -141,7 +143,7 @@ void App::UpdateScene(float dt)
 					cam1st->SetFrustum(XM_PI / 3, AspectRatio(), 0.5f, 1000.0f);
 					m_pCamera = cam1st;
 			}
-			cam1st->LookTo(XMFLOAT3(m_pCar->GetPosition().x - 2.5f, 1.5f, m_pCar->GetPosition().z), m_pCar->GetDirection(), XMFLOAT3(0.0f, 1.0f, 0.0f));
+			cam1st->LookTo(XMFLOAT3(m_pCar->GetPosition().x, 1.5f, m_pCar->GetPosition().z), m_pCar->GetDirection(), XMFLOAT3(0.0f, 1.0f, 0.0f));
 
 			m_CameraMode = CameraMode::FirstPerson;
 		}
@@ -174,36 +176,34 @@ void App::DrawScene()
 	m_pd3dImmediateContext->ClearRenderTargetView(m_pRenderTargetView.Get(), reinterpret_cast<const float*>(&Colors::Black));
 	m_pd3dImmediateContext->ClearDepthStencilView(m_pDepthStencilView.Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
-	// ********************
 	// 1. Draw non-transparent objects
-	//
 	m_BasicEffect.SetRenderDefault(m_pd3dImmediateContext.Get());
 
 	m_pCar->Draw(m_pd3dImmediateContext.Get(), m_BasicEffect);
-	m_pGound->Draw(m_pd3dImmediateContext.Get(), m_BasicEffect);
+	m_pRoad->Draw(m_pd3dImmediateContext.Get(), m_BasicEffect);
+	m_pGrass_l->Draw(m_pd3dImmediateContext.Get(), m_BasicEffect);
+	m_pGrass_r->Draw(m_pd3dImmediateContext.Get(), m_BasicEffect);
 	m_pHouse->Draw(m_pd3dImmediateContext.Get(), m_BasicEffect);
+	m_pTree->Draw(m_pd3dImmediateContext.Get(), m_BasicEffect);
 
-	// ******************
 	// 2. Draw shadows of opaque normal objects
-	//
-
 	m_BasicEffect.SetShadowState(true);
 	m_BasicEffect.SetRenderNoDoubleBlend(m_pd3dImmediateContext.Get(), 0);
 
 	m_pCar->SetMaterial(m_shadowMat);
-	m_pHouse->SetMaterials(houseShadowMat);
+	m_pHouse->SetMaterials(m_houseShadowMat);
+	m_pTree->SetMaterials(m_treeShadowMat);
 
 	m_pCar->Draw(m_pd3dImmediateContext.Get(), m_BasicEffect);
 	m_pHouse->Draw(m_pd3dImmediateContext.Get(), m_BasicEffect);
+	m_pTree->Draw(m_pd3dImmediateContext.Get(), m_BasicEffect);
 
 	m_BasicEffect.SetShadowState(false);
 	m_pCar->SetMaterial(m_normalMat);
-	m_pHouse->SetMaterials(houseMat);
+	m_pHouse->SetMaterials(m_houseMat);
+	m_pTree->SetMaterials(m_treeMat);
 
-
-	// ******************
 	// 3. Draw sky box
-	//
 	m_SkyEffect.SetRenderDefault(m_pd3dImmediateContext.Get());
 	m_pDaylight->Draw(m_pd3dImmediateContext.Get(), m_SkyEffect, *m_pCamera);
 
@@ -212,78 +212,71 @@ void App::DrawScene()
 
 bool App::InitResource()
 {
-	// ******************
+	if (!InitGameObjects()) return false;
+	InitFirstPersonCamera();
+	InitEffects();
+	InitLight();
+	return true;
+}
+
+bool App::InitGameObjects()
+{
 	// Initialze skybox
-	//
+	HR(m_pDaylight->InitResource(m_pd3dDevice.Get(), m_pd3dImmediateContext.Get(), L"Texture\\skybox\\daylight.jpg", 5000.0f));
 
-	HR(m_pDaylight->InitResource(m_pd3dDevice.Get(), m_pd3dImmediateContext.Get(),
-		L"Texture\\daylight.jpg",
-		5000.0f));
-
-	// ******************
 	// Initialize objects
-	//
-
 	// Car
 	m_pCar->SetMaterial(m_normalMat);
 	m_pCar->CreateCar(m_pd3dDevice.Get());
 
 	// Ground
 	ComPtr<ID3D11ShaderResourceView> texture;
-	HR(CreateDDSTextureFromFile(m_pd3dDevice.Get(), L"Texture\\Ground.dds", nullptr, texture.ReleaseAndGetAddressOf()));
-	m_pGound->SetModel(Model(m_pd3dDevice.Get(),
-		Geometry::CreatePlane(XMFLOAT2(10000.0f, 10000.0f), XMFLOAT2(500.0f, 500.0f))));
-	m_pGound->SetWorldMatrix(XMMatrixTranslation(0.0f, -2.0f, 0.0f));
-	m_pGound->SetTexture(texture.Get());
-	m_pGound->SetMaterial(m_normalMat);
+	HR(CreateDDSTextureFromFile(m_pd3dDevice.Get(), L"Texture\\Ground\\road.dds", nullptr, texture.ReleaseAndGetAddressOf()));
+	m_pRoad->SetModel(Model(m_pd3dDevice.Get(),
+		Geometry::CreatePlane(XMFLOAT2(1000.0f, 50.0f), XMFLOAT2(100.0f, 2.0f))));
+	m_pRoad->SetWorldMatrix(XMMatrixTranslation(0.0f, -2.0f, 0.0f));
+	m_pRoad->SetTexture(texture.Get());
+	m_pRoad->SetMaterial(m_normalMat);
+
+	// Grass left
+	HR(CreateDDSTextureFromFile(m_pd3dDevice.Get(), L"Texture\\Ground\\grass.dds", nullptr, texture.ReleaseAndGetAddressOf()));
+	m_pGrass_l->SetModel(Model(m_pd3dDevice.Get(),
+		Geometry::CreatePlane(XMFLOAT2(1000.0f, 500.0f), XMFLOAT2(100.0f, 50.0f))));
+	m_pGrass_l->SetWorldMatrix(XMMatrixTranslation(0.0f, -2.0f, -275.0f));
+	m_pGrass_l->SetTexture(texture.Get());
+	m_pGrass_l->SetMaterial(m_normalMat);
+
+	// Grass right
+	HR(CreateDDSTextureFromFile(m_pd3dDevice.Get(), L"Texture\\Ground\\grass.dds", nullptr, texture.ReleaseAndGetAddressOf()));
+	m_pGrass_r->SetModel(Model(m_pd3dDevice.Get(),
+		Geometry::CreatePlane(XMFLOAT2(1000.0f, 500.0f), XMFLOAT2(100.0f, 50.0f))));
+	m_pGrass_r->SetWorldMatrix(XMMatrixTranslation(0.0f, -2.0f, 275.0f));
+	m_pGrass_r->SetTexture(texture.Get());
+	m_pGrass_r->SetMaterial(m_normalMat);
 
 	// House
 	m_ObjReader.Read(L"Model\\house.mbo", L"Model\\house.obj");
 	m_pHouse->SetModel(Model(m_pd3dDevice.Get(), m_ObjReader));
-	m_pHouse->GetMaterials(houseMat);
-	houseShadowMat = std::vector<Material> {houseMat.size(), m_shadowMat};
+	m_pHouse->GetMaterials(m_houseMat);
+	m_houseShadowMat = std::vector<Material>{ m_houseMat.size(), m_shadowMat };
 
-	XMMATRIX S = XMMatrixScaling(0.2f, 0.2f, 0.2f);
+	XMMATRIX S = XMMatrixScaling(0.15f, 0.15f, 0.15f);
 	BoundingBox houseBox = m_pHouse->GetLocalBoundingBox();
 	houseBox.Transform(houseBox, S);
 
 	m_pHouse->SetWorldMatrix(S * XMMatrixTranslation(-70.0f, -(houseBox.Center.y - houseBox.Extents.y + 1.0f) - 1.0f, 70.0f));
 
-	// ******************
-	// Initialize camera
-	//
-	InitFirstPersonCamera();
+	// Tree
+	m_ObjReader.Read(L"Model\\tree.mbo", L"Model\\tree.obj");
+	m_pTree->SetModel(Model(m_pd3dDevice.Get(), m_ObjReader));
+	m_pTree->GetMaterials(m_treeMat);
+	m_treeShadowMat = std::vector<Material>{ m_treeMat.size(), m_shadowMat };
 
-	m_BasicEffect.SetViewMatrix(m_pCamera->GetViewMatrixXM());
-	m_BasicEffect.SetEyePos(m_pCamera->GetPositionXM());
+	S = XMMatrixScaling(0.05f, 0.05f, 0.05f);
+	BoundingBox treeBox = m_pTree->GetLocalBoundingBox();
+	treeBox.Transform(houseBox, S);
 
-	m_pCamera->SetFrustum(XM_PI / 3, AspectRatio(), 0.5f, 1000.0f);
-	m_BasicEffect.SetProjMatrix(m_pCamera->GetProjMatrixXM());
-
-	// ******************
-	// Initialize non-change value
-	//
-
-	// Slightly higher to show shadows
-	m_BasicEffect.SetShadowMatrix(XMMatrixShadow(XMVectorSet(0.0f, 0.5f, 0.0f, 0.99f), XMVectorSet(0.0f, 10.0f, -10.0f, 1.0f)));
-	m_BasicEffect.SetRefShadowMatrix(XMMatrixShadow(XMVectorSet(0.0f, 0.5f, 0.0f, 0.99f), XMVectorSet(0.0f, 10.0f, 30.0f, 1.0f)));
-
-	// dirLight
-	DirectionalLight dirLight;
-	dirLight.ambient = XMFLOAT4(0.5f, 0.5f, 0.5f, 1.0f);
-	dirLight.diffuse = XMFLOAT4(0.8f, 0.8f, 0.8f, 1.0f);
-	dirLight.specular = XMFLOAT4(0.5f, 0.5f, 0.5f, 1.0f);
-	dirLight.direction = XMFLOAT3(0.0f, -1.0f, 0.0f);
-	m_BasicEffect.SetDirLight(0, dirLight);
-	// pointLight
-	PointLight pointLight;
-	pointLight.position = XMFLOAT3(0.0f, 10.0f, -10.0f);
-	pointLight.ambient = XMFLOAT4(0.3f, 0.3f, 0.3f, 1.0f);
-	pointLight.diffuse = XMFLOAT4(0.6f, 0.6f, 0.6f, 1.0f);
-	pointLight.specular = XMFLOAT4(0.2f, 0.2f, 0.2f, 1.0f);
-	pointLight.att = XMFLOAT3(0.0f, 0.1f, 0.0f);
-	pointLight.range = 2500.0f;
-	m_BasicEffect.SetPointLight(0, pointLight);
+	m_pTree->SetWorldMatrix(S * XMMatrixTranslation(-30.0f, -(treeBox.Center.y - treeBox.Extents.y + 1.0f) - 1.0f, -25.0f));
 
 	return true;
 }
@@ -297,9 +290,42 @@ void App::InitFirstPersonCamera()
 
 	// Set camera position
 	XMFLOAT3 cameraPos = m_pCar->GetPosition();
-	cameraPos.x -= 2.5f;
 	cameraPos.y += 1.5f;
 	camera->SetPosition(cameraPos);
 	camera->LookTo(camera->GetPosition(), m_pCar->GetDirection(), XMFLOAT3(0.0f, 1.0f, 0.0f));
+}
+
+void App::InitEffects()
+{
+	m_BasicEffect.SetViewMatrix(m_pCamera->GetViewMatrixXM());
+	m_BasicEffect.SetEyePos(m_pCamera->GetPositionXM());
+
+	m_pCamera->SetFrustum(XM_PI / 3, AspectRatio(), 0.5f, 1000.0f);
+	m_BasicEffect.SetProjMatrix(m_pCamera->GetProjMatrixXM());
+
+	// Slightly higher to show shadows
+	m_BasicEffect.SetShadowMatrix(XMMatrixShadow(XMVectorSet(0.0f, 0.5f, 0.0f, 0.99f), XMVectorSet(0.0f, 10.0f, -10.0f, 1.0f)));
+	m_BasicEffect.SetRefShadowMatrix(XMMatrixShadow(XMVectorSet(0.0f, 0.5f, 0.0f, 0.99f), XMVectorSet(0.0f, 10.0f, 30.0f, 1.0f)));
+}
+
+void App::InitLight()
+{
+	// dirLight
+	DirectionalLight dirLight;
+	dirLight.ambient = XMFLOAT4(0.5f, 0.5f, 0.5f, 1.0f);
+	dirLight.diffuse = XMFLOAT4(0.8f, 0.8f, 0.8f, 1.0f);
+	dirLight.specular = XMFLOAT4(0.5f, 0.5f, 0.5f, 1.0f);
+	dirLight.direction = XMFLOAT3(0.0f, -1.0f, 0.0f);
+	m_BasicEffect.SetDirLight(0, dirLight);
+
+	//// pointLight
+	//PointLight pointLight;
+	//pointLight.position = XMFLOAT3(0.0f, 10.0f, -10.0f);
+	//pointLight.ambient = XMFLOAT4(0.3f, 0.3f, 0.3f, 1.0f);
+	//pointLight.diffuse = XMFLOAT4(0.6f, 0.6f, 0.6f, 1.0f);
+	//pointLight.specular = XMFLOAT4(0.2f, 0.2f, 0.2f, 1.0f);
+	//pointLight.att = XMFLOAT3(0.0f, 0.1f, 0.0f);
+	//pointLight.range = 100.0f;
+	//m_BasicEffect.SetPointLight(0, pointLight);
 }
 
