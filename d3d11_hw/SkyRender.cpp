@@ -5,17 +5,15 @@
 using namespace DirectX;
 using namespace Microsoft::WRL;
 
-#pragma warning(disable: 26812)
-
 HRESULT SkyRender::InitResource(ID3D11Device* device, ID3D11DeviceContext* deviceContext, const std::wstring& cubemapFilename, float skySphereRadius, bool generateMips)
 {
-	// 防止重复初始化造成内存泄漏
+	// Reset
 	m_pIndexBuffer.Reset();
 	m_pVertexBuffer.Reset();
 	m_pTextureCubeSRV.Reset();
 
 	HRESULT hr;
-	// 天空盒纹理加载
+	// Load texture
 	if (cubemapFilename.substr(cubemapFilename.size() - 3) == L"dds")
 	{
 		hr = CreateDDSTextureFromFile(device,
@@ -42,13 +40,13 @@ HRESULT SkyRender::InitResource(ID3D11Device* device, ID3D11DeviceContext* devic
 
 HRESULT SkyRender::InitResource(ID3D11Device* device, ID3D11DeviceContext* deviceContext, const std::vector<std::wstring>& cubemapFilenames, float skySphereRadius, bool generateMips)
 {
-	// 防止重复初始化造成内存泄漏
+	// Reset
 	m_pIndexBuffer.Reset();
 	m_pVertexBuffer.Reset();
 	m_pTextureCubeSRV.Reset();
 
 	HRESULT hr;
-	// 天空盒纹理加载
+	// Load texture
 	hr = CreateWICTexture2DCubeFromFile(device,
 		deviceContext,
 		cubemapFilenames,
@@ -80,26 +78,12 @@ void SkyRender::Draw(ID3D11DeviceContext* deviceContext, SkyEffect& skyEffect, c
 	deviceContext->DrawIndexed(m_IndexCount, 0, 0);
 }
 
-void SkyRender::SetDebugObjectName(const std::string& name)
-{
-#if (defined(DEBUG) || defined(_DEBUG)) && (GRAPHICS_DEBUGGER_OBJECT_NAME)
-	// 先清空可能存在的名称
-	D3D11SetDebugObjectName(m_pTextureCubeSRV.Get(), nullptr);
-
-	D3D11SetDebugObjectName(m_pTextureCubeSRV.Get(), name + ".CubeMapSRV");
-	D3D11SetDebugObjectName(m_pVertexBuffer.Get(), name + ".VertexBuffer");
-	D3D11SetDebugObjectName(m_pIndexBuffer.Get(), name + ".IndexBuffer");
-#else
-	UNREFERENCED_PARAMETER(name);
-#endif
-}
-
 HRESULT SkyRender::InitResource(ID3D11Device* device, float skySphereRadius)
 {
 	HRESULT hr;
 	auto sphere = Geometry::CreateSphere<VertexPos>(skySphereRadius);
 
-	// 顶点缓冲区创建
+	// Create vertext buffer
 	D3D11_BUFFER_DESC vbd;
 	vbd.Usage = D3D11_USAGE_IMMUTABLE;
 	vbd.ByteWidth = sizeof(XMFLOAT3) * (UINT)sphere.vertexVec.size();
@@ -115,7 +99,7 @@ HRESULT SkyRender::InitResource(ID3D11Device* device, float skySphereRadius)
 	if (hr != S_OK)
 		return hr;
 
-	// 索引缓冲区创建
+	// Create index buffer
 	m_IndexCount = (UINT)sphere.indexVec.size();
 
 	D3D11_BUFFER_DESC ibd;

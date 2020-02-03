@@ -20,8 +20,35 @@
     <Filter Include="Camera">
       <UniqueIdentifier>{a93fbd63-3f4a-4d8c-93f0-05e07ca6f1eb}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Effects">
+    <Filter Include="Framework\InputDevice">
+      <UniqueIdentifier>{c9c20e32-4798-4a25-97ee-8fd9213c6a89}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Framework\Timer">
+      <UniqueIdentifier>{76b6bb41-3c21-4f9b-821a-53550cf9d500}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Framework\Loader">
+      <UniqueIdentifier>{c83a037f-d252-497d-b3e1-a57a764ea684}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Framework\Structure">
+      <UniqueIdentifier>{8813b393-9a7c-43ef-b52a-87fa84937194}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Framework\Effect">
       <UniqueIdentifier>{1bb7f01d-183c-43e4-8e79-9d2f94b5cdf0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Framework\Render">
+      <UniqueIdentifier>{a5455e22-962f-4b23-be0e-78a5eca9b1be}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Framework\Util">
+      <UniqueIdentifier>{61bbfdd2-dbd6-426b-bd0b-04155fd714b2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Framework\Geometry">
+      <UniqueIdentifier>{3208ed77-39ec-4291-a79c-053268070b9e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Framework\Light">
+      <UniqueIdentifier>{47966ac7-71cd-4b58-9560-c17fd22696ae}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Framework\App">
+      <UniqueIdentifier>{5d9a0347-ffbf-4e53-b7ea-a93e2146657a}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -37,33 +64,6 @@
     <ClCompile Include="Main.cpp">
       <Filter>App</Filter>
     </ClCompile>
-    <ClCompile Include="DXTrace.cpp">
-      <Filter>Framework</Filter>
-    </ClCompile>
-    <ClCompile Include="GameTimer.cpp">
-      <Filter>Framework</Filter>
-    </ClCompile>
-    <ClCompile Include="Keyboard.cpp">
-      <Filter>Framework</Filter>
-    </ClCompile>
-    <ClCompile Include="Mouse.cpp">
-      <Filter>Framework</Filter>
-    </ClCompile>
-    <ClCompile Include="Vertex.cpp">
-      <Filter>Framework</Filter>
-    </ClCompile>
-    <ClCompile Include="d3dUtil.cpp">
-      <Filter>Framework</Filter>
-    </ClCompile>
-    <ClCompile Include="DDSTextureLoader.cpp">
-      <Filter>Framework</Filter>
-    </ClCompile>
-    <ClCompile Include="WICTextureLoader.cpp">
-      <Filter>Framework</Filter>
-    </ClCompile>
-    <ClCompile Include="d3dApp.cpp">
-      <Filter>Framework</Filter>
-    </ClCompile>
     <ClCompile Include="Camera.cpp">
       <Filter>Camera</Filter>
     </ClCompile>
@@ -73,47 +73,53 @@
     <ClCompile Include="ThirdPersonCamera.cpp">
       <Filter>Camera</Filter>
     </ClCompile>
-    <ClCompile Include="RenderStates.cpp">
-      <Filter>Framework</Filter>
-    </ClCompile>
     <ClCompile Include="BasicEffect.cpp">
-      <Filter>Effects</Filter>
-    </ClCompile>
-    <ClCompile Include="Model.cpp">
-      <Filter>Framework</Filter>
-    </ClCompile>
-    <ClCompile Include="ObjReader.cpp">
-      <Filter>Framework</Filter>
-    </ClCompile>
-    <ClCompile Include="SkyRender.cpp">
-      <Filter>Framework</Filter>
+      <Filter>Framework\Effect</Filter>
     </ClCompile>
     <ClCompile Include="SkyEffect.cpp">
-      <Filter>Effects</Filter>
+      <Filter>Framework\Effect</Filter>
+    </ClCompile>
+    <ClCompile Include="DDSTextureLoader.cpp">
+      <Filter>Framework\Loader</Filter>
+    </ClCompile>
+    <ClCompile Include="WICTextureLoader.cpp">
+      <Filter>Framework\Loader</Filter>
+    </ClCompile>
+    <ClCompile Include="Keyboard.cpp">
+      <Filter>Framework\InputDevice</Filter>
+    </ClCompile>
+    <ClCompile Include="Mouse.cpp">
+      <Filter>Framework\InputDevice</Filter>
+    </ClCompile>
+    <ClCompile Include="GameTimer.cpp">
+      <Filter>Framework\Timer</Filter>
+    </ClCompile>
+    <ClCompile Include="ObjReader.cpp">
+      <Filter>Framework\Loader</Filter>
+    </ClCompile>
+    <ClCompile Include="Model.cpp">
+      <Filter>Framework\Structure</Filter>
+    </ClCompile>
+    <ClCompile Include="Vertex.cpp">
+      <Filter>Framework\Structure</Filter>
+    </ClCompile>
+    <ClCompile Include="RenderStates.cpp">
+      <Filter>Framework\Render</Filter>
+    </ClCompile>
+    <ClCompile Include="d3dUtil.cpp">
+      <Filter>Framework\Util</Filter>
+    </ClCompile>
+    <ClCompile Include="DXTrace.cpp">
+      <Filter>Framework\Util</Filter>
+    </ClCompile>
+    <ClCompile Include="d3dApp.cpp">
+      <Filter>Framework\App</Filter>
+    </ClCompile>
+    <ClCompile Include="SkyRender.cpp">
+      <Filter>Object</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="GameTimer.h">
-      <Filter>Framework</Filter>
-    </ClInclude>
-    <ClInclude Include="Keyboard.h">
-      <Filter>Framework</Filter>
-    </ClInclude>
-    <ClInclude Include="Mouse.h">
-      <Filter>Framework</Filter>
-    </ClInclude>
-    <ClInclude Include="Geometry.h">
-      <Filter>Framework</Filter>
-    </ClInclude>
-    <ClInclude Include="Vertex.h">
-      <Filter>Framework</Filter>
-    </ClInclude>
-    <ClInclude Include="LightHelper.h">
-      <Filter>Framework</Filter>
-    </ClInclude>
-    <ClInclude Include="DXTrace.h">
-      <Filter>Framework</Filter>
-    </ClInclude>
     <ClInclude Include="D3DObject.h">
       <Filter>Object</Filter>
     </ClInclude>
@@ -122,18 +128,6 @@
     </ClInclude>
     <ClInclude Include="App.h">
       <Filter>App</Filter>
-    </ClInclude>
-    <ClInclude Include="d3dUtil.h">
-      <Filter>Framework</Filter>
-    </ClInclude>
-    <ClInclude Include="DDSTextureLoader.h">
-      <Filter>Framework</Filter>
-    </ClInclude>
-    <ClInclude Include="WICTextureLoader.h">
-      <Filter>Framework</Filter>
-    </ClInclude>
-    <ClInclude Include="d3dApp.h">
-      <Filter>Framework</Filter>
     </ClInclude>
     <ClInclude Include="Camera.h">
       <Filter>Camera</Filter>
@@ -144,23 +138,56 @@
     <ClInclude Include="ThirdPersonCamera.h">
       <Filter>Camera</Filter>
     </ClInclude>
-    <ClInclude Include="RenderStates.h">
-      <Filter>Framework</Filter>
-    </ClInclude>
     <ClInclude Include="EffectHelper.h">
-      <Filter>Effects</Filter>
+      <Filter>Framework\Effect</Filter>
     </ClInclude>
     <ClInclude Include="Effects.h">
-      <Filter>Effects</Filter>
+      <Filter>Framework\Effect</Filter>
     </ClInclude>
-    <ClInclude Include="Model.h">
-      <Filter>Framework</Filter>
+    <ClInclude Include="DDSTextureLoader.h">
+      <Filter>Framework\Loader</Filter>
+    </ClInclude>
+    <ClInclude Include="WICTextureLoader.h">
+      <Filter>Framework\Loader</Filter>
+    </ClInclude>
+    <ClInclude Include="Keyboard.h">
+      <Filter>Framework\InputDevice</Filter>
+    </ClInclude>
+    <ClInclude Include="Mouse.h">
+      <Filter>Framework\InputDevice</Filter>
+    </ClInclude>
+    <ClInclude Include="GameTimer.h">
+      <Filter>Framework\Timer</Filter>
     </ClInclude>
     <ClInclude Include="ObjReader.h">
-      <Filter>Framework</Filter>
+      <Filter>Framework\Loader</Filter>
+    </ClInclude>
+    <ClInclude Include="Model.h">
+      <Filter>Framework\Structure</Filter>
+    </ClInclude>
+    <ClInclude Include="Vertex.h">
+      <Filter>Framework\Structure</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderStates.h">
+      <Filter>Framework\Render</Filter>
+    </ClInclude>
+    <ClInclude Include="d3dUtil.h">
+      <Filter>Framework\Util</Filter>
+    </ClInclude>
+    <ClInclude Include="DXTrace.h">
+      <Filter>Framework\Util</Filter>
+    </ClInclude>
+    <ClInclude Include="Geometry.h">
+      <Filter>Framework\Geometry</Filter>
+    </ClInclude>
+    <ClInclude Include="LightHelper.h">
+      <Filter>Framework\Light</Filter>
+    </ClInclude>
+    <ClInclude Include="d3dApp.h">
+      <Filter>Framework\App</Filter>
     </ClInclude>
     <ClInclude Include="SkyRender.h">
-      <Filter>Framework</Filter>
+      <Filter>Object</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
